@@ -1,0 +1,28 @@
+Package: GRADA
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Lucas F.",
+           family = "Voges",
+           role = c("aut", "cre"),
+           email = "lucas.voges@chemie.uni-hamburg.de",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: A utilization of Unix commands to search a given sequence (string) in a file. This allowes Adapter detection in read files.
+License: `use_mit_license()`, `use_gpl3_license()` or friends to
+    pick a license
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports:
+	  parallel,
+    MASS,
+    DT
+Depends:
+    parallel,
+    MASS,
+    DT
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

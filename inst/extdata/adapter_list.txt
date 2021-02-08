@@ -1,0 +1,6 @@
+>IlumniaUniversalAdapter
+AGATCGGAAGAGC
+>NANANANANANANA
+NNN
+>AAA?
+AAA
