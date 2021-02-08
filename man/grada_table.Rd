@@ -18,7 +18,10 @@ grada_table(
 \arguments{
 \item{PE}{paired data? TRUE / FALSE (std. TRUE)}
 
-\item{seq}{sequences to search for (adapters) (A text file containing:">Name\nSequence\n>IlumniaUniversalAdapter\nAGATCGGAAGAGC")}
+\item{seq}{sequences to search for (adapters) (A text file containing:">Name
+Sequence
+IlumniaUniversalAdapter
+AGATCGGAAGAGC")}
 
 \item{read1}{Path to R1 read file (std. NULL)}
 

@@ -3,7 +3,10 @@
 #' This function will perform a unix "agrep" and "wc" to look through the read.fastq files. This will be iterativly done for each mismatch allowed (note: mismatches are only other characters - if the adapter sequence is overlaping it will not be found). The Mismatches can't be bigger then the shortest sequence!
 #'
 #' @param PE paired data? TRUE / FALSE (std. TRUE)
-#' @param seq sequences to search for (adapters) (A text file containing:">Name\nSequence\n>IlumniaUniversalAdapter\nAGATCGGAAGAGC")
+#' @param seq sequences to search for (adapters) (A text file containing:">Name
+#' Sequence
+#' IlumniaUniversalAdapter
+#' AGATCGGAAGAGC")
 #' @param read1 Path to R1 read file (std. NULL)
 #' @param read2 Path to R2 read file (if paired data, std. NULL)
 #' @param M_min minimal mismatches allowed (std. 0)
