@@ -108,7 +108,7 @@ grada_table <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_ma
   adapter_content <- read.table(paste0(output, "grada_table.txt"), header = TRUE)
   content_l <- length(adapter_content)-1
   datatable(adapter_content, rownames = FALSE,
-            caption = "Table 1: Adapter Content in the FastQ-Files",
+            caption = "Table 1: Sequence content in the .fastq files",
             class = 'cell-border stripe',
             extensions = c('Buttons', 'FixedColumns'),
             options = list(dom = 'Bfrtip',
@@ -120,7 +120,8 @@ grada_table <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_ma
                            # columnDefs = list(list(width = '100px', targets = c(1,2))),
                            fixedColumns = TRUE
             )) %>%  formatRound(c(3:content_l+1), 0)
-writeLines("GRADA has made a table!\n")
+  
+  writeLines("GRADA has made a table!\n")
 }
 
 

@@ -1,0 +1,40 @@
+---
+title: "example"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(GRADA)
+```
+
+```{r load example data}
+# The example data from Phage - SRX6454172 (first 100 reads) can be used to test the function.
+read1 <- system.file("extdata", "grada_R1.fastq", package = "GRADA")
+read2 <- system.file("extdata", "grada_R2.fastq", package = "GRADA")
+seq <- system.file("extdata", "adapter_list.txt", package = "GRADA")
+```
+
+```{r grada_table()}
+# This will render the DataTable (DT) 
+grada_table(PE = TRUE, seq = seq, read1 = read1, read2 = read2, M_min = 0)
+```
+
+```{r grada_plot()}
+# This will plot the found countings for mismatch = 0
+# It needs the data from grada_table() !
+grada_plot(PE = TRUE, readlength = 125, skip = TRUE, plot_row = 1, plot_col = 1)
+```
+
