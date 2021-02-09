@@ -100,7 +100,7 @@ grada_table <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_ma
 
   ##### Results - writing table #####
   write.table(adapters, file = paste0(output, "grada_table.txt"), row.names = FALSE)
-  writeLines("GRADA has made a table!\nTHIS IS A DEBUG")
+  writeLines("GRADA has made a table!\n")
 
   #### Delete count files ####
   system(paste0("rm ", output, "counts_*"), intern = FALSE)
