@@ -100,6 +100,7 @@ grada_table <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_ma
 
   ##### Results - writing table #####
   write.table(adapters, file = paste0(output, "grada_table.txt"), row.names = FALSE)
+  writeLines("GRADA has made a table!\nTHIS IS A DEBUG")
 
   #### Delete count files ####
   system(paste0("rm ", output, "counts_*"), intern = FALSE)
@@ -120,10 +121,6 @@ grada_table <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_ma
                            # columnDefs = list(list(width = '100px', targets = c(1,2))),
                            fixedColumns = TRUE
             )) %>%  formatRound(c(3:content_l+1), 0)
-  
-  writeLines("GRADA has made a table!\nTHIS IS A DEBUG")
-  
-  datatable(iris)
 }
 
 
