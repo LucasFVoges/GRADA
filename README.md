@@ -18,13 +18,25 @@ simple GRep ADapter Analyser
 just run:
 `devtools::install_github("LucasFVoges/GRADA", build_vignettes = TRUE)`
 
+## BEFORE USING THE SCRIPT
+Please note, that GRADA will create an temp/ folder in your working directory. It will save the results here but also the .txt files wich will have the corresponding reads inside.
+
+These files can be very big and can be deleted afterwards!
+
 ## Usage:
 You can load some example data:
-`
+```
 read1 <- system.file("extdata", "grada_R1.fastq", package = "GRADA")
 read2 <- system.file("extdata", "grada_R2.fastq", package = "GRADA")
 seq <- system.file("extdata", "adapter_list.txt", package = "GRADA")
-`
+```
+
+Then you can call the table and plot function (this will change a little in future releases)
+```
+grada_table(seq = seq, read1 = read1, read2 = read2)
+grada_plot()
+```
+There are additional options to these functions.
 
 ## Example:
 GRADA comes with an example vignette and example data (very basic).
@@ -33,5 +45,7 @@ GRADA comes with an example vignette and example data (very basic).
 
 or: 
 
-`library(GRADA)   
-vignette("example")`
+```
+library(GRADA)   
+vignette("example")
+```
