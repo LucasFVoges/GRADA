@@ -121,7 +121,9 @@ grada_table <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_ma
                            fixedColumns = TRUE
             )) %>%  formatRound(c(3:content_l+1), 0)
   
-  writeLines("GRADA has made a table!\n")
+  writeLines("GRADA has made a table!\nTHIS IS A DEBUG")
+  
+  datatable(iris)
 }
 
 
