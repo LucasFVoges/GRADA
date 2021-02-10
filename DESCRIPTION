@@ -1,6 +1,6 @@
 Package: GRADA
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: NGS data sequence (adapter) analyser
+Version: 1.1
 Authors@R: 
     person(given = "Lucas F.",
            family = "Voges",
@@ -14,14 +14,9 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Imports:
-	  parallel,
-    DT
-Depends:
-    parallel,
-    MASS,
-    DT
 Suggests: 
+	parallel,
+    DT,
     knitr,
     rmarkdown
 VignetteBuilder: knitr
