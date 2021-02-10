@@ -9,7 +9,7 @@ simple GRep ADapter Analyser
 
 - UNIX System (developed on Linux Mint 20.1 Cinnamon)
 - R-Studio
-  - packages:
+  - packages are suggested:
   - DT
   - parallel
   
@@ -23,6 +23,14 @@ Please note, that GRADA will create an temp/ folder in your working directory. I
 These files can be very big and can be deleted afterwards!
 
 ## Usage:
+```
+library(GRADA)
+
+# recommended at the moment:
+library(parallel) 
+library(DT)
+```
+
 You can load some example data:
 ```
 read1 <- system.file("extdata", "grada_R1.fastq", package = "GRADA")
