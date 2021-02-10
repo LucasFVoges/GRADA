@@ -13,7 +13,7 @@
 #' @param M_max maximal mismatches allowed (std. 2)
 #' @param output the folder where all data will be created. (std. "temp/")
 #' @return A Table of the found sequences (adapters) will aslo save it as txt file.
-#' @param numCores Number of cores to use. !!! script will use probably all cores if maxCores/2 is selected. (std. detectCores()/2)
+#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not neccessary! (std. detectCores()/2)
 #' @export
 grada_table <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_max=2, output= "temp/", numCores=detectCores()/2){
   ####### Testing function calling #####
@@ -22,7 +22,7 @@ grada_table <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_ma
   if (M_min < 0){stop("You have entered a negative number...")}
   if (M_min > M_max){stop("minimum mismatches can't be higher then maximum!")}
   if (PE == TRUE && is.null(read2) == TRUE){stop("No paired data supplied?")}
-  if (M_max - M_min > 5){print("WARNING: that will take time and space! Too many mismatches...")}
+  if (M_max - M_min > 5){print("WARNING: that will take time and space!  many mismatches...")}
 
   ####### USER INPUT ##########
 
@@ -76,14 +76,21 @@ grada_table <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_ma
   write_adap_read <- function(adapter){
     if (PE){Rnum <- 1:2} else {Rnum <- 1:1}                  # check if paired data is TRUE.
     for (M in M_max:M_min) {
-      mclapply(Rnum, find_adap_read, adapter, M, mc.silent = TRUE, mc.cores = tail(Rnum, n=1))        # and give to the find function
+      if (numCores == 1){
+        lapply(Rnum, find_adap_read, adapter, M)  
+      } else {
+        mclapply(Rnum, find_adap_read, adapter, M, mc.silent = TRUE, mc.cores = tail(Rnum, n=1))        # and give to the find function
+      }
     }
     return(paste0(adapter, " seems to has finished"))
   }
 
   ##### writing temp adapter_files #####
-  mclapply(adapters[,"Sequence"], write_adap_read, mc.silent = TRUE, mc.cores = numCores)
-
+  if (numCores == 1){
+    lapply(adapters[,"Sequence"], write_adap_read)
+    } else {
+    mclapply(adapters[,"Sequence"], write_adap_read, mc.silent = TRUE, mc.cores = numCores)
+    }
   ##### saving the count files to the list #####
   if (PE) {Rnum <- 2} else {Rnum <- 1}
   for (R in 1:Rnum) {
@@ -133,7 +140,7 @@ grada_table <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_ma
 #' @param PE paired data? TRUE / FALSE (std. TRUE)
 #' @param readlength longest read! for X-axis. (std. 150)
 #' @param input input folder where the "grada_table.txt" is (output from grada_table())
-#' @param numCores Number of cores to use. !!! script will use probably all cores if maxCores/2 is selected. (std. detectCores()/2)
+#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not neccessary! (std. detectCores()/2)
 #' @param skip if TRUE, it will skip plots for empty Data (if adapter is not found) so you will not get empty plots (sometimes it happens that the first plost is present anyway. this is due to a matrix R-command). (std. TRUE)
 #' @param plot_row is the par(mfrow=c(plot_row,plot_col)) for arrenging the plots (std. 2)
 #' @param plot_col is the par(mfrow=c(plot_row,plot_col)) for arrenging the plots (std. 2)
@@ -154,7 +161,11 @@ grada_plot <- function(PE = TRUE, readlength = 150, input="temp/", numCores=dete
   # Function:
   find_positions <- function(adapter){
     if (PE) {Rnum <- 1:2} else {Rnum <- 1:1}
-    mclapply(Rnum, find_positions_sec, adapter, mc.cores = tail(Rnum, n=1))
+    if (numCores == 1){
+      lapply(Rnum, find_positions_sec, adapter)
+    } else {
+      mclapply(Rnum, find_positions_sec, adapter, mc.cores = tail(Rnum, n=1))
+    }  
     return(paste0(adapter, " has been prepared for plotting"))
   }
 
@@ -174,8 +185,12 @@ grada_plot <- function(PE = TRUE, readlength = 150, input="temp/", numCores=dete
   }
 
   # call function
-  mclapply(adapters[,"Sequence"], find_positions, mc.silent = TRUE,  mc.cores = numCores)
-
+  if (numCores == 1){
+    lapply(adapters[,"Sequence"], find_positions)
+  } else {  
+    mclapply(adapters[,"Sequence"], find_positions, mc.silent = TRUE,  mc.cores = numCores)
+  }
+  
   # load all data in a table
   for (adapter_i in adapters[,"Sequence"]) {
     if (PE){Rnum <- 1:2} else {Rnum <- 1:1}

@@ -18,6 +18,8 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(GRADA)
+library(parallel)
+library(DT)
 ```
 
 ```{r load example data}
@@ -35,6 +37,6 @@ grada_table(PE = TRUE, seq = seq, read1 = read1, read2 = read2, M_min = 0)
 ```{r grada_plot()}
 # This will plot the found countings for mismatch = 0
 # It needs the data from grada_table() !
-grada_plot(PE = TRUE, readlength = 125, skip = TRUE, plot_row = 1, plot_col = 1)
+grada_plot(PE = TRUE, readlength = 125, skip = TRUE, plot_row = 1, plot_col = 1, numCores = 1)
 ```
 

@@ -21,7 +21,7 @@ grada_plot(
 
 \item{input}{input folder where the "grada_table.txt" is (output from grada_table())}
 
-\item{numCores}{Number of cores to use. !!! script will use probably all cores if maxCores/2 is selected. (std. detectCores()/2)}
+\item{numCores}{Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not neccessary! (std. detectCores()/2)}
 
 \item{skip}{if TRUE, it will skip plots for empty Data (if adapter is not found) so you will not get empty plots (sometimes it happens that the first plost is present anyway. this is due to a matrix R-command). (std. TRUE)}
 
