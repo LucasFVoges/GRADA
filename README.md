@@ -18,10 +18,14 @@ A complete introduction: [see in Vignettes](http://htmlpreview.github.io/?https:
   - rmarkdown
   
 ## Installation:
-just run:  
-`devtools::install_github("LucasFVoges/GRADA", build_vignettes = TRUE)`
+To install the master brach (latest stable release)
+just run:
+`devtools::install_github("LucasFVoges/GRADA", build_vignettes = TRUE)`  
 or for latest development version:  
 `devtools::install_github("LucasFVoges/GRADA", branch = "dev", build_vignettes = TRUE)`
+
+You can install also local version of this by simply download the latest or one of the releases, put your workspace inside the GRADA folder. and then:  
+`devtools::install()`  
 
 ## BEFORE USING THE SCRIPT
 Please note, that GRADA will create an temp/ folder in your working directory. It will save the results here but also the .txt files wich will have the corresponding reads inside.
