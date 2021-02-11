@@ -17,7 +17,7 @@
 #' @export
 grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_max=2, output= "temp/", numCores=detectCores()/2){
   ####### Testing function calling #####
-  writeLines(paste0("#### GRADA v.1.0 ####\nfun: grada_table()\nPaired data: ", PE, "\nR1: ", read1, ", R2: ", read2,"\nSequences: ", seq, "\nFrom ", M_min, " to ", M_max, " mismatches\n\nSave to: ", output, "\n#####################\n"))
+  writeLines(paste0("#### GRADA v.1.1 ####\nfun: grada_table()\nPaired data: ", PE, "\nR1: ", read1, ", R2: ", read2,"\nSequences: ", seq, "\nFrom ", M_min, " to ", M_max, " mismatches\n\nSave to: ", output, "\n#####################\n"))
   if (is.null(read1)){stop("No data file (read1 = ?)")}
   if (M_min < 0){stop("You have entered a negative number...")}
   if (M_min > M_max){stop("minimum mismatches can't be higher then maximum!")}
@@ -127,7 +127,7 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
 grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", numCores=detectCores()/2){
   missM <- 0 # No Effect until now... (unix awk command has to change)
   # Size of the rads must be set here!
-  writeLines(paste0("#### GRADA v.1.0 ####\nfun: grada_plot()\nPaired data: ", PE, "\nRead length: ", readlength, "\nInput: ", input, "grada_table.txt\nMismatches", missM, " (fixed)\n#####################\n"))
+  writeLines(paste0("#### GRADA v.1.1 ####\nfun: grada_plot()\nPaired data: ", PE, "\nRead length: ", readlength, "\nInput: ", input, "grada_table.txt\nMismatches", missM, " (fixed)\n#####################\n"))
   adapter_positions <- matrix(ncol = readlength, nrow = 0)
   colnames(adapter_positions) <- c(1:readlength)
   if (!(file.exists(paste0(input, "grada_table.txt")))){stop("could not find grada_table.txt - pleas run grada_table() first.")}
