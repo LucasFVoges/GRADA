@@ -29,7 +29,6 @@ grada_plot <- function(){
 #' @export
 grada_plot_bar <- function(PE = TRUE, input="temp/", skip=TRUE, plot_row=2, plot_col=2){
   missM <- 0 # No Effect until now... (unix awk command has to change)
-  writeLines(paste0("#### GRADA v.1.0 ####\nfun: grada_plot()\nPaired data: ", PE, "\nInput: ", input, "Adapter_Positions.Rdata\nSkip empty plots: ", skip, "\nMismatches", missM, " (fixed)\n#####################\n"))
 
   #### Load Data ####
   if (substr(input, nchar(input) - 1 + 1, nchar(input)) == "/"){
@@ -78,5 +77,4 @@ grada_plot_bar <- function(PE = TRUE, input="temp/", skip=TRUE, plot_row=2, plot
             cex.main = .8,
             border = NA)
   }
- writeLines(paste0("GRADA has plotted in " , plot_row, "x", plot_col, " arrangement!\n"))
 }

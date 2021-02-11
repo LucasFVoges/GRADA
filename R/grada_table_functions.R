@@ -34,9 +34,6 @@ grada_table_simple <- function(input= "temp/"){
 #' @return a table of the found adapters (forward R1 and reverse R2) with mismatches (M)
 #' @export
 grada_table_DT <- function(input= "temp/"){
-  ####### Testing function calling #####
-  writeLines(paste0("#### GRADA v.1.1 ####\nfun: grada_table_DT()\n#####################\n"))
-
   #### return DT table ####
   adapter_content <- read.table(paste0(input, "grada_table.txt"), header = TRUE)
   content_l <- length(adapter_content)-1

@@ -49,6 +49,10 @@ This will show the found adapters in a table.
 
 - data from grada_analyze() is needed.
 
+```{r}
+grada_table_DT()
+```
+
 # Plot the results:
 This function will plot the found countings (for mismatch = 0)  
 
@@ -61,6 +65,6 @@ For the standard stettings all the three following commands are the same:
 - `grada_plot_bar()`
 - `grada_plot()`
 
-```{r grada_plot_bar()}
+```{r}
 grada_plot_bar(PE = TRUE, skip = TRUE, plot_row = 1, plot_col = 1)
 ```
