@@ -9,20 +9,34 @@
 #' @return a table of the found adapters (forward R1 and reverse R2) with mismatches (M)
 #' @export
 grada_table <- function(){
-  grada_table_DT()
+  grada_table_simple()
   }
 
 #' GRADA - simple table
 #'
-#' This function will render a table of the results from grada_analyze()
+#' This function will render a table of the results from grada_analyze() using knitr::kable().
 #'
 #' @param input the folder where "grada_table.txt" is saved. (std. "temp/")
 #' @return a table of the found adapters (forward R1 and reverse R2) with mismatches (M)
 #' @export
 grada_table_simple <- function(input= "temp/"){
-  # nothing here jet
+  adapter_content <- read.table(paste0(input, "grada_table.txt"), header = TRUE)
+  knitr::kable(adapter_content, digits = 3, format.args = list(big.mark = ",",scientific = FALSE), caption = "Sequence content in the read files. (M: mismatch)")
   }
 
+#' GRADA - markdown table
+#'
+#' This function will render a table of the results from grada_analyze() using markdown.
+#' 
+#' requires library(rmarkdown)
+#'
+#' @param input the folder where "grada_table.txt" is saved. (std. "temp/")
+#' @return a table of the found adapters (forward R1 and reverse R2) with mismatches (M)
+#' @export
+grada_table_md <- function(input= "temp/"){
+  adapter_content <- read.table(paste0(input, "grada_table.txt"), header = TRUE)
+  paged_table(adapter_content, options = list(rows.print = 10))
+}
 
 #' GRADA - Datatable (DT) 
 #'
@@ -38,7 +52,7 @@ grada_table_DT <- function(input= "temp/"){
   adapter_content <- read.table(paste0(input, "grada_table.txt"), header = TRUE)
   content_l <- length(adapter_content)-1
   datatable(adapter_content, rownames = FALSE,
-            caption = "Table 1: Sequence content in the read files",
+            caption = "Sequence content in the read files. (M: mismatch)",
             class = 'cell-border stripe',
             extensions = c('Buttons', 'FixedColumns'),
             options = list(dom = 'Bfrtip',

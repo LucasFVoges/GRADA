@@ -20,6 +20,7 @@ knitr::opts_chunk$set(
 library(GRADA)
 library(parallel)
 library(DT)
+library(rmarkdown)
 ```
 ## Example Data:
 ```{r load example data}
@@ -49,8 +50,18 @@ This will show the found adapters in a table.
 
 - data from grada_analyze() is needed.
 
+## DataTable (DT)
+
+- for DT the package "DT" is needed.
+
 ```{r}
 grada_table_DT()
+```
+
+## kable
+
+```{r}
+grada_table_simple()
 ```
 
 # Plot the results:

@@ -14,6 +14,8 @@ A complete introduction: [see in Vignettes](http://htmlpreview.github.io/?https:
 - R-packages are suggested:
   - DT
   - parallel
+  - knitr
+  - rmarkdown
   
 ## Installation:
 just run:  
@@ -51,13 +53,20 @@ grada_plot()
 ```
 There are additional options to these functions.
 
+### Table
+
 For the table there is:
 ```
-# For a R-table:
+# For a kable-table:
 grada_table_simple()
+# For a rmarkdown-table (requires "rmarkdown" package):
+grada_table_md()
 # For a DT interactive table (requires "DT" package):
 grada_table_DT() = grada_table()
 ```
+But you could use your own table-script. you can load the data with: `load("temp/Adapter_Positions.Rdata")`
+
+### Plot
 
 For the plots there is:
 ```
