@@ -1,4 +1,4 @@
-#' GRADA - table
+#' GRADA - analyze
 #'
 #' This function will perform a unix "agrep" and "wc" to look through the read.fastq files. This will be iterativly done for each mismatch allowed (note: mismatches are only other characters - if the adapter sequence is overlaping it will not be found). The Mismatches can't be bigger then the shortest sequence!
 #'
@@ -12,10 +12,10 @@
 #' @param M_min minimal mismatches allowed (std. 0)
 #' @param M_max maximal mismatches allowed (std. 2)
 #' @param output the folder where all data will be created. (std. "temp/")
-#' @return A Table of the found sequences (adapters) will aslo save it as txt file.
 #' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not neccessary! (std. detectCores()/2)
+#' @return A Table as .txt of the found sequences (adapters) and .txt files containig reads per sequence and mistake.
 #' @export
-grada_table <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_max=2, output= "temp/", numCores=detectCores()/2){
+grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_max=2, output= "temp/", numCores=detectCores()/2){
   ####### Testing function calling #####
   writeLines(paste0("#### GRADA v.1.0 ####\nfun: grada_table()\nPaired data: ", PE, "\nR1: ", read1, ", R2: ", read2,"\nSequences: ", seq, "\nFrom ", M_min, " to ", M_max, " mismatches\n\nSave to: ", output, "\n#####################\n"))
   if (is.null(read1)){stop("No data file (read1 = ?)")}
@@ -111,44 +111,23 @@ grada_table <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_ma
 
   #### Delete count files ####
   system(paste0("rm ", output, "counts_*"), intern = FALSE)
-
-  #### return table ####
-  adapter_content <- read.table(paste0(output, "grada_table.txt"), header = TRUE)
-  content_l <- length(adapter_content)-1
-  datatable(adapter_content, rownames = FALSE,
-            caption = "Table 1: Sequence content in the .fastq files",
-            class = 'cell-border stripe',
-            extensions = c('Buttons', 'FixedColumns'),
-            options = list(dom = 'Bfrtip',
-                           pageLength = 20,
-                           lengthMenu = c(5, 10, 100),
-                           buttons = list('copy', 'excel', 'pdf', 'pageLength', list(extend = 'colvis', columns = c(1:content_l))),
-                           autoWidth = FALSE,
-                           # seems not to effect anything:
-                           # columnDefs = list(list(width = '100px', targets = c(1,2))),
-                           fixedColumns = TRUE
-            )) %>%  formatRound(c(3:content_l+1), 0)
 }
 
 
-#' GRADA - plot
+#' GRADA - Analyze Positions
 #'
-#' This function will count the positions of the sequences found in grada_table. Therefore grada_table needs to be run prior. It will only search for mismatches = 0.
-#'
-#' plots will be skipped if no adapters are found. If there are any difficulties with this function, may set skip to FALSE.
+#' This function will count the 1. positions of the sequences found in grada_table. Therefore grada_table needs to be run prior. It will only search for mismatches = 0.
 #'
 #' @param PE paired data? TRUE / FALSE (std. TRUE)
 #' @param readlength longest read! for X-axis. (std. 150)
 #' @param input input folder where the "grada_table.txt" is (output from grada_table())
 #' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not neccessary! (std. detectCores()/2)
-#' @param skip if TRUE, it will skip plots for empty Data (if adapter is not found) so you will not get empty plots (sometimes it happens that the first plost is present anyway. this is due to a matrix R-command). (std. TRUE)
-#' @param plot_row is the par(mfrow=c(plot_row,plot_col)) for arrenging the plots (std. 2)
-#' @param plot_col is the par(mfrow=c(plot_row,plot_col)) for arrenging the plots (std. 2)
+#' @return Rdata matrix and can be used for your own plots as well.
 #' @export
-grada_plot <- function(PE = TRUE, readlength = 150, input="temp/", numCores=detectCores()/2, skip=TRUE, plot_row=2, plot_col=2){
+grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", numCores=detectCores()/2){
   missM <- 0 # No Effect until now... (unix awk command has to change)
   # Size of the rads must be set here!
-  writeLines(paste0("#### GRADA v.1.0 ####\nfun: grada_plot()\nPaired data: ", PE, "\nRead length: ", readlength, "\nInput: ", input, "grada_table.txt\nSkip empty plots: ", skip, "\nMismatches", missM, " (fixed)\n#####################\n"))
+  writeLines(paste0("#### GRADA v.1.0 ####\nfun: grada_plot()\nPaired data: ", PE, "\nRead length: ", readlength, "\nInput: ", input, "grada_table.txt\nMismatches", missM, " (fixed)\n#####################\n"))
   adapter_positions <- matrix(ncol = readlength, nrow = 0)
   colnames(adapter_positions) <- c(1:readlength)
   if (!(file.exists(paste0(input, "grada_table.txt")))){stop("could not find grada_table.txt - pleas run grada_table() first.")}
@@ -208,46 +187,5 @@ grada_plot <- function(PE = TRUE, readlength = 150, input="temp/", numCores=dete
   #### Delete temp files ####
   system(paste0("rm ", input, "Adapter_Positions_*"), intern = FALSE)
 
-  #### PLOT ####
-  # delete the data with no content!
-  if (skip){
-    if (PE){
-      kills <- c()
-      for (i in row.names(adapter_positions)){
-        a <- which(row.names(adapter_positions) == i)
-        if (a %% 2 == 0) {
-          next
-        }
-        if (sum(adapter_positions[a,]) == 0 && sum(adapter_positions[a+1,]) == 0){
-          kills <- c(kills, a, a+1)
-        }
-      }
-    } else {
-      kills <- c()
-      for (i in row.names(adapter_positions)){
-        a <- which(row.names(adapter_positions) == i)
-        if (sum(adapter_positions[a,]) == 0){
-          kills <- c(kills, a)
-        }
-      }
-    }
-
-    # follow line is just for fixing a bug. I need to fix!
-    while ((nrow(adapter_positions) - length(kills)) < 2){kills <- head(kills, -1)}
-    adapter_positions <- adapter_positions[-kills,]
-  }
-  # Graph generation: (barplot simple one after another.)
-  par(mfrow=c(plot_row,plot_col))
-  for (i in row.names(adapter_positions)){
-    barplot(adapter_positions[i,],
-            col = "#1b98e0",
-            main = sprintf("%s (1.Pos!)", i),
-            #ylim = c(0, 90000),
-            las = 2,
-            cex.names = .8,
-            cex.main = .8,
-
-            border = NA)
-  }
- writeLines(paste0("GRADA has plotted in " , plot_row, "x", plot_col, " arrangement!\n"))
+ writeLines(paste0("GRADA has analyzed the positions!\n"))
 }
