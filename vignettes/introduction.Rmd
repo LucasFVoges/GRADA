@@ -14,6 +14,22 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(GRADA)
-```
+## GRADA
+GRADA is a R-Package to analyze adapter sequences in read files. But it could be used to find any given sequence (string) in a text-based file. It will use the unix "agrep" and "wc" command. Therefore it will only function if these are installed in the system.
+
+## How to use?
+please refert to the RADME.md in the GIT repository.
+
+You can also look at the example vignette inside this package.
+
+## Adapter contamination
+
+The adapter contamination in NGS data is checked during quality control. It is important to do so!^[https://www.future-science.com/doi/10.2144/04372BM03] There are many programms and workflows using adapter recognition, though I missed a simple way for evaluating the success of such methods in regard to quantify the contamination level.
+
+With GRADA it is now possible to achieve this evaluation. And you can combine it with your quality control workflow easely.
+
+### What is happening inside?
+- TODO
+
+### Future releases
+- TODO
