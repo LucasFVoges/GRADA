@@ -12,10 +12,24 @@ grada_table <- function(){
   grada_table_DT()
   }
 
-#' GRADA - Datatable (DT) 
+#' GRADA - simple table
 #'
 #' This function will render a table of the results from grada_analyze()
 #'
+#' @param input the folder where "grada_table.txt" is saved. (std. "temp/")
+#' @return a table of the found adapters (forward R1 and reverse R2) with mismatches (M)
+#' @export
+grada_table_simple <- function(input= "temp/"){
+  # nothing here jet
+  }
+
+
+#' GRADA - Datatable (DT) 
+#'
+#' requires: library("DT")!
+#' 
+#' This function will render a table of the results from grada_analyze()
+#' 
 #' @param input the folder where "grada_table.txt" is saved. (std. "temp/")
 #' @return a table of the found adapters (forward R1 and reverse R2) with mismatches (M)
 #' @export
