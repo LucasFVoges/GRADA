@@ -58,11 +58,11 @@ There are additional options to these functions.
 For the table there is:
 ```
 # For a kable-table:
-grada_table_simple()
+grada_table_simple() = grada_table()
 # For a rmarkdown-table (requires "rmarkdown" package):
 grada_table_md()
 # For a DT interactive table (requires "DT" package):
-grada_table_DT() = grada_table()
+grada_table_DT() 
 ```
 But you could use your own table-script. you can load the data with: `load("temp/Adapter_Positions.Rdata")`
 
