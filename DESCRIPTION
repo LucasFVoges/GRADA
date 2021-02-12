@@ -8,8 +8,7 @@ Authors@R:
            email = "lucas.voges@chemie.uni-hamburg.de",
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: A utilization of Unix commands to search a given sequence (string) in a file. This allowes Adapter detection in read files.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to
-    pick a license
+License: file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

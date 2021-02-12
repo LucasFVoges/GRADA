@@ -31,10 +31,10 @@ seq <- system.file("extdata", "adapter_list.txt", package = "GRADA")
 ```
 
 # Analyze the Sequences:
-This will render the DataTable (DT) 
+This will analyze the read files read1 and read2 (if PE)
 
-```{r grada_table()}
-grada_analyze(PE = TRUE, seq = seq, read1 = read1, read2 = read2, M_min = 0)
+```{r}
+grada_analyze(PE = TRUE, seq = seq, read1 = read1, read2 = read2, M_min = 0, numCores = 1)
 ```
 
 ## find the first position of the adapter sequence
