@@ -22,7 +22,8 @@ To install the master brach (latest stable release)
 just run:
 `devtools::install_github("LucasFVoges/GRADA", build_vignettes = TRUE)`  
 or for latest development version:  
-`devtools::install_github("LucasFVoges/GRADA", branch = "dev", build_vignettes = TRUE)`
+WRONG: `devtools::install_github("LucasFVoges/GRADA", branch = "dev", build_vignettes = TRUE)`  
+`devtools::install_github("LucasFVoges/GRADA@dev", build_vignettes = TRUE)`
 
 You can install also local version of this by simply download the latest or one of the releases, put your workspace inside the GRADA folder. and then:  
 `devtools::install()`  
