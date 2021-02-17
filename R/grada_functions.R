@@ -149,7 +149,8 @@ grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", 
   }
 
   find_positions_sec <- function(R, adapter){
-    poslist <- c(0:(readlength-1))
+    poslist <- c(1:(readlength))
+    # was before: poslist <- c(0:(readlength-1)) This is wrong. And was used wrongly! :(
     awk_positions <- system(intern = TRUE, paste0("awk -v p=", adapter," 'index($0,p) {s=$0; m=0; while((n=index(s,p))>0){m+=n; printf \"%s,\", m; s=substr(s, n+1)}}' ", input, "temp_R", R, "_", adapter, "_M", missM,".txt"))
     # build vector
     positions <- as.vector(as.numeric(unlist(strsplit(awk_positions, ","))))
