@@ -100,8 +100,7 @@ grada_plot_bar_full <- function(PE = TRUE, input="temp/", skip=TRUE, plot_row=2,
   #### Load Data ####
   if (substr(input, nchar(input) - 1 + 1, nchar(input)) == "/"){
     load(paste0(input, "Adapter_Positions.Rdata"))  
-    adapter_content <- read.table(paste0(input, "grada_table.txt"), header = TRUE)
-    adapter_content <- read.table("grada_table.txt", header = TRUE, row.names = 1)
+    adapter_content <- read.table(paste0(input, "grada_table.txt"), header = TRUE, row.names = 1)
   } else {
     stop("input folder problem. (Please add '/' to the end)")
   }
