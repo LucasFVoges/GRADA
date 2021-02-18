@@ -28,8 +28,10 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
 
   # Input for the Adapters
   input1 <- file(seq, "r")
-  # Output folder:
-  if (!(dir.exists(output))){dir.create(output)}
+  # Output folder (create if not exist):
+  if (!(dir.exists(output))){
+    dir.create(output, recursive = TRUE)
+  }
 
   #############################
 
@@ -38,19 +40,24 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
   colnames(adapters) <- c("Adapter", "Sequence", "Length")
 
   ### Read the adapter file ###
+  search_name <- TRUE
   while (TRUE) {
     line = trimws(readLines(input1, n = 1))       # read one line of the file
     if (length(line) == 0 ) {                   # End of file
       break
     }
     if (substr(line, 1, 1) == ">") {            # get the Adapter Name
-      adap_name <- substring(line, 2)
+      adap_name <- trimws(line, whitespace = "[>,<, ,!]")
       next
     } else if (line == "") {                    # Skip any Blank Lines
       next
     }
+    if (line %in% adapters[,"Sequence"]){
+      writeLines(paste0("---\nA doubled sequence: ", line, " is skipped...!\n"))
+      next
+    }  
     if (adap_name == ""){
-      print("Could not read complete adapter file. There is a formating problem. Please check your adapters!")
+      writeLines("---\nCould not read complete adapter file. There is a formating problem. Please check your adapters!\n")
       break
     }
     adapters <- rbind(adapters, c(adap_name, line, nchar(line)))
