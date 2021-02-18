@@ -1,0 +1,12 @@
+>My_adapter
+ACTTCTGGACT
+>AGA Adapter
+AGAAGAAGAAGAAGAAGA
+>doubled_adapter
+ACTTCTGGACT
+> NNN?
+NNN
+> Index
+AGAT
+>TGC-Tail
+TGCTGCTGC
