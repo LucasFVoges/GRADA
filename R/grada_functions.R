@@ -42,7 +42,7 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
   ### Read the adapter file ###
   search_name <- TRUE
   while (TRUE) {
-    line = trimws(readLines(input1, n = 1))       # read one line of the file
+    line = trimws(readLines(input1, n = 1))     # read one line of the file
     if (length(line) == 0 ) {                   # End of file
       break
     }
