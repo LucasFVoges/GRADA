@@ -1,19 +1,19 @@
 #' GRADA - analyze
 #'
-#' This function will perform a unix "agrep" and "wc" to look through the read.fastq files. This will be iterativly done for each mismatch allowed (note: mismatches are only other characters - if the adapter sequence is overlaping it will not be found). The Mismatches can't be bigger then the shortest sequence!
+#' This function will perform a unix "agrep" and "wc" to look through the read.fastq files. This will be iteratively done for each mismatch allowed (note: mismatches are only other characters - if the adapter sequence is overlapping it will not be found). The Mismatches can't be bigger then the shortest sequence!
 #'
 #' @param PE paired data? TRUE / FALSE (std. TRUE)
-#' @param seq sequences to search for (adapters) (A text file containing:">Name
+#' @param seq "sequence text file" to search for (adapters) (A text file containing:">Name
 #' Sequence
 #' IlumniaUniversalAdapter
 #' AGATCGGAAGAGC")
-#' @param read1 Path to R1 read file (std. NULL)
-#' @param read2 Path to R2 read file (if paired data, std. NULL)
+#' @param read1 "R1 read file.fastq" (std. NULL)
+#' @param read2 "R2 read file.fastq" (if paired data, std. NULL)
 #' @param M_min minimal mismatches allowed (std. 0)
 #' @param M_max maximal mismatches allowed (std. 2)
 #' @param output the folder where all data will be created. (std. "temp/")
-#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not neccessary! (std. detectCores()/2)
-#' @return A Table as .txt of the found sequences (adapters) and .txt files containig reads per sequence and mistake.
+#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()/2)
+#' @return A Table as .txt of the found sequences (adapters) and .txt files containing reads per sequence and mistake.
 #' @export
 grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_max=2, output= "temp/", numCores=detectCores()/2){
   ####### Testing function calling #####
@@ -75,7 +75,7 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
       read <- paste0(output, "temp_R", Rnum, "_", adapter, "_M", Mnum+1, ".txt")
     }
     # This is the AGREP Unix function for finding the sequences:
-    system(paste0("agrep -", Mnum, " " , adapter, " ", read, " > ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)
+    system(paste0("agrep -", Mnum, " " , adapter, " '", read, "' > ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)
     # This is the counting Unix wc function:
     system(paste0("wc -l ", output, "temp_R", Rnum, "_", adapter,"_M", Mnum, ".txt | cut -f1 -d' ' > ", output, "counts_temp_R", Rnum, "_", adapter,"_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)
   }
@@ -128,7 +128,7 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
 #' @param PE paired data? TRUE / FALSE (std. TRUE)
 #' @param readlength longest read! for X-axis. (std. 150)
 #' @param input input folder where the "grada_table.txt" is (output from grada_table())
-#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not neccessary! (std. detectCores()/2)
+#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()/2)
 #' @return Rdata matrix and can be used for your own plots as well.
 #' @export
 grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", numCores=detectCores()/2){

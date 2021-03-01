@@ -42,10 +42,10 @@ library(GRADA)
 library(parallel)
 
 grada_analyze(
-  PE = FALSE,                    # analyze paired data (or 2 read files)
-  read1 = "example.fastq", # read file (fastq, txt ... anything agrep works with.)
-  read2 = NULL,                  # read2 file if PE
-  seq = "seq_adapter.txt",       # adapter files
+  PE = FALSE,                 # analyze paired data (or 2 read files)
+  read1 = "example.fastq",    # read file (fastq, txt ... anything agrep works with.)
+  read2 = NULL,               # read2 file if PE
+  seq = "seq_adapter.txt",    # adapter files
   M_min = 0,                  # minimal mismatches (0 is required for plotting.)
   M_max = 2,                  # maximal mismatches
   output = "temp/example/",   # the folder for the created data (will be large)
@@ -60,7 +60,7 @@ grada_analyze_positions(
 )
 ```
 
-> readlength = 150: the nice thing is, that this will be used for plotting. So you can use a different number here! In this example the "TGCTGC" tail is after the 150 nt. So you can put readlength = 200 to see them in the plot! *will be removed or set automaticly in the future*
+> readlength = 150: the nice thing is, that this will be used for plotting. So you can use a different number here! In this example the "TGCTGC" tail is after the 150 nt. So you can put readlength = 200 to see them in the plot! *will be removed or set automatically in the future*
 >
 > will give warning: "number of columns of result is not a multiple of vector length (arg 2)" if set lower then max read length.
 
