@@ -18,7 +18,7 @@ grada_analyze_positions(
 
 \item{input}{input folder where the "grada_table.txt" is (output from grada_table())}
 
-\item{numCores}{Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not neccessary! (std. detectCores()/2)}
+\item{numCores}{Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()/2)}
 }
 \value{
 Rdata matrix and can be used for your own plots as well.

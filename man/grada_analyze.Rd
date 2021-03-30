@@ -18,14 +18,14 @@ grada_analyze(
 \arguments{
 \item{PE}{paired data? TRUE / FALSE (std. TRUE)}
 
-\item{seq}{sequences to search for (adapters) (A text file containing:">Name
+\item{seq}{"sequence text file" to search for (adapters) (A text file containing:">Name
 Sequence
 IlumniaUniversalAdapter
 AGATCGGAAGAGC")}
 
-\item{read1}{Path to R1 read file (std. NULL)}
+\item{read1}{"R1 read file.fastq" (std. NULL)}
 
-\item{read2}{Path to R2 read file (if paired data, std. NULL)}
+\item{read2}{"R2 read file.fastq" (if paired data, std. NULL)}
 
 \item{M_min}{minimal mismatches allowed (std. 0)}
 
@@ -33,11 +33,11 @@ AGATCGGAAGAGC")}
 
 \item{output}{the folder where all data will be created. (std. "temp/")}
 
-\item{numCores}{Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not neccessary! (std. detectCores()/2)}
+\item{numCores}{Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()/2)}
 }
 \value{
-A Table as .txt of the found sequences (adapters) and .txt files containig reads per sequence and mistake.
+A Table as .txt of the found sequences (adapters) and .txt files containing reads per sequence and mistake.
 }
 \description{
-This function will perform a unix "agrep" and "wc" to look through the read.fastq files. This will be iterativly done for each mismatch allowed (note: mismatches are only other characters - if the adapter sequence is overlaping it will not be found). The Mismatches can't be bigger then the shortest sequence!
+This function will perform a unix "agrep" and "wc" to look through the read.fastq files. This will be iteratively done for each mismatch allowed (note: mismatches are only other characters - if the adapter sequence is overlapping it will not be found). The Mismatches can't be bigger then the shortest sequence!
 }
