@@ -75,7 +75,7 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
       read <- paste0(output, "temp_R", Rnum, "_", adapter, "_M", Mnum+1, ".txt")
     }
     # This is the AGREP Unix function for finding the sequences:
-    system(paste0("agrep -", Mnum, " " , adapter, " '", read, "' > ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)
+    system(paste0("agrep -i -", Mnum, " " , adapter, " '", read, "' > ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)
     # This is the counting Unix wc function:
     system(paste0("wc -l ", output, "temp_R", Rnum, "_", adapter,"_M", Mnum, ".txt | cut -f1 -d' ' > ", output, "counts_temp_R", Rnum, "_", adapter,"_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)
   }
