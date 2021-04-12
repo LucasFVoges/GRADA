@@ -18,14 +18,11 @@ grada_analyze(
 \arguments{
 \item{PE}{paired data? TRUE / FALSE (std. TRUE)}
 
-\item{seq}{"sequence text file" to search for (adapters) (A text file containing:">Name
-Sequence
-IlumniaUniversalAdapter
-AGATCGGAAGAGC")}
+\item{seq}{"sequence text file" to search for (adapters) (A text file containing 2 lines per Sequence: >AdapterName\n Sequence for example: >IlumniaUniversalAdapter\n AGATCGGAAGAGC") look in examples for an, well, example.}
 
-\item{read1}{"R1 read file.fastq" (std. NULL)}
+\item{read1}{"R1 read file.fastq(.gz)" (std. NULL)}
 
-\item{read2}{"R2 read file.fastq" (if paired data, std. NULL)}
+\item{read2}{"R2 read file.fastq(.gz)" (if paired data, std. NULL)}
 
 \item{M_min}{minimal mismatches allowed (std. 0)}
 
@@ -39,5 +36,10 @@ AGATCGGAAGAGC")}
 A Table as .txt of the found sequences (adapters) and .txt files containing reads per sequence and mistake.
 }
 \description{
-This function will perform a unix "agrep" and "wc" to look through the read.fastq files. This will be iteratively done for each mismatch allowed (note: mismatches are only other characters - if the adapter sequence is overlapping it will not be found). The Mismatches can't be bigger then the shortest sequence!
+This function will perform a unix "agrep" and "wc" (and "zcat") to look through the read.fastq(.gz) files.
+It will take more time if used on zipped (.gz) files. Consider to unzip...
+This search will be iteratively done for each mismatch allowed (note: mismatches are only other characters - if the adapter sequence is overlapping it will not be found. No Indels possible at this time). The Mismatches can't be bigger then the shortest sequence!
+}
+\details{
+! This works only case sensitive !
 }

@@ -15,7 +15,7 @@ grada_plot_bar_full(
 \arguments{
 \item{PE}{paired data? TRUE / FALSE (std. TRUE)}
 
-\item{input}{input folder where the "dapter_Positions.Rdata" and "grada_table.txt" is (output from grada_analyze() / _positions() std. "temp/")}
+\item{input}{input folder where the "adapter_Positions.Rdata" and "grada_table.txt" is (output from grada_analyze() / _positions() std. "temp/")}
 
 \item{skip}{if TRUE, it will skip plots for empty Data (if adapter is not found) so you will not get empty plots (sometimes it happens that the first plost is present anyway. this is due to a matrix R-command). (std. TRUE)}
 
@@ -30,7 +30,7 @@ R barplots of the adapter positions.
 This function will plot the results of grada_analyze_positions() which stored in "Adapter_Positions.Rdata"
 }
 \details{
-All positions! of the found Sequence will be plottet.
+All positions! of the found Sequence will be plotted.
 
 plots will be skipped if no adapters are found. If there are any difficulties with this function, may set skip to FALSE.
 }

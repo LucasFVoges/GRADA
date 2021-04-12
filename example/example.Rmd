@@ -43,7 +43,7 @@ library(parallel)
 
 grada_analyze(
   PE = FALSE,                 # analyze paired data (or 2 read files)
-  read1 = "example.fastq",    # read file (fastq, txt ... anything agrep works with.)
+  read1 = "example.fastq.gz",    # read file (fastq, txt ... anything agrep works with.)
   read2 = NULL,               # read2 file if PE
   seq = "seq_adapter.txt",    # adapter files
   M_min = 0,                  # minimal mismatches (0 is required for plotting.)

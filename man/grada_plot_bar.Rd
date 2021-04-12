@@ -15,7 +15,7 @@ grada_plot_bar(
 \arguments{
 \item{PE}{paired data? TRUE / FALSE (std. TRUE)}
 
-\item{input}{input folder where the "dapter_Positions.Rdata" is (output from grada_analyze_positions() std. "temp/")}
+\item{input}{input folder where the "adapter_Positions.Rdata" is (output from grada_analyze_positions() std. "temp/")}
 
 \item{skip}{if TRUE, it will skip plots for empty Data (if adapter is not found) so you will not get empty plots (sometimes it happens that the first plost is present anyway. this is due to a matrix R-command). (std. TRUE)}
 
@@ -30,7 +30,7 @@ R barplots of the adapter positions.
 This function will plot the results of grada_analyze_positions() which are stored in "Adapter_Positions.Rdata"
 }
 \details{
-The first position of the found Sequence will be plottet! If the read is 100 bases long and the adapter 10, the maximal position will therefor be 91!
+The first position of the found Sequence will be plotted! If the read is 100 bases long and the adapter 10, the maximal position will therefore be 91!
 
 plots will be skipped if no adapters are found. If there are any difficulties with this function, may set skip to FALSE.
 }
