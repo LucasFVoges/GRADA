@@ -12,6 +12,7 @@ grada_analyze(
   M_min = 0,
   M_max = 2,
   output = "temp/",
+  omitMeta = FALSE,
   numCores = detectCores()/2
 )
 }
@@ -29,6 +30,8 @@ grada_analyze(
 \item{M_max}{maximal mismatches allowed (std. 2)}
 
 \item{output}{the folder where all data will be created. (std. "temp/")}
+
+\item{omitMeta}{if TRUE: only sequences will be analyzed and the rest of the read data omitted. This can be beneficial if sequences are found in the title line. Although fewer lines need to be searched, this option will be slower. (std. FALSE)}
 
 \item{numCores}{Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()/2)}
 }

@@ -13,10 +13,11 @@
 #' @param M_min minimal mismatches allowed (std. 0)
 #' @param M_max maximal mismatches allowed (std. 2)
 #' @param output the folder where all data will be created. (std. "temp/")
+#' @param omitMeta if TRUE: only sequences will be analyzed and the rest of the read data omitted. This can be beneficial if sequences are found in the title line. Although fewer lines need to be searched, this option will be slower. (std. FALSE)
 #' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()/2)
 #' @return A Table as .txt of the found sequences (adapters) and .txt files containing reads per sequence and mistake.
 #' @export
-grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_max=2, output= "temp/", numCores=detectCores()/2){
+grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_max=2, output= "temp/", omitMeta=FALSE, numCores=detectCores()/2){
   ####### Testing function calling #####
   writeLines(paste0("#### GRADA v.1.2 ####\nfun: grada_table()\nPaired data: ", PE, "\nR1: ", read1, ", R2: ", read2,"\nSequences: ", seq, "\nFrom ", M_min, " to ", M_max, " mismatches\n\nSave to: ", output, "\n#####################\n"))
   # Test if Unix commands are available:
@@ -40,6 +41,10 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
   }
 
   #############################
+  
+  ### CHECK NAMES ###
+  read1 <- trimws(read1)
+  if(PE){read2 <- trimws(read2)}
 
   ##### INIT #####
   adapters <- matrix(ncol = 3, nrow = 0)
@@ -75,23 +80,43 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
 
   # writing reads :
   find_adap_read <- function(Rnum, adapter, Mnum){
+    ### This part handles if the read file or the temp files are used:
     if (Mnum == M_max){
       if (Rnum == 1){read <- read1} else {read <- read2}
       # check if file is compressed:
-      if(substr(trimws(read), nchar(trimws(read))-2, nchar(trimws(read))) == ".gz"){
+      if(substr(read, nchar(read)-2, nchar(read)) == ".gz"){
         compressed <- TRUE
       } else {
         compressed <- FALSE
       }
+      # check if omitMeta:
+      if(omitMeta){
+        omit <- TRUE
+      } else{
+        omit <- FALSE
+      }
     } else {
       read <- paste0(output, "temp_R", Rnum, "_", adapter, "_M", Mnum+1, ".txt")
       compressed <- FALSE
+      omit <- FALSE
     }
-    # This is the AGREP Unix function for finding the sequences:
-    if(!compressed){system(paste0("agrep -", Mnum, " " , adapter, " '", read, "' > ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)} else {
-    # If compressed file is used:
-    system(paste0("zcat '", read, "' | agrep -", Mnum, " " , adapter, " > ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)}
-    # This is the counting Unix wc function:
+      
+    ### the AGREP Unix function ###
+    if(!compressed && !omit){
+      system(paste0("agrep -", Mnum, " " , adapter, " '", read, "' > ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)
+      } else {
+        ### Make the omit/compressed string:
+        if(compressed && omit){
+          pipestringA <- paste0("zcat '", read, "' | sed '/^$/d' | awk 'NR % 4 == 2' | ")
+        } else if (compressed && !omit){
+          pipestringA <- paste0("zcat '", read, "' | ")
+        } else if (!compressed && omit){
+          pipestringA <- paste0("sed '/^$/d' '", read, "' | awk 'NR % 4 == 2' | ")
+        }
+        system(paste0(pipestringA, "agrep -", Mnum, " " , adapter, " > ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)
+      }
+    
+    # This is the unix wc counting function:
     system(paste0("wc -l ", output, "temp_R", Rnum, "_", adapter,"_M", Mnum, ".txt | cut -f1 -d' ' > ", output, "counts_temp_R", Rnum, "_", adapter,"_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)
   }
 
