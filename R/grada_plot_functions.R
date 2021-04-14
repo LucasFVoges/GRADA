@@ -63,6 +63,7 @@ grada_plot_bar <- function(PE = TRUE, input="temp/", skip=TRUE, plot_row=2, plot
 
     # follow line is just for fixing a bug. I need to fix!
     while ((nrow(adapter_positions) - length(kills)) < 2){kills <- head(kills, -1)}
+    # Here is an Error!
     adapter_positions <- adapter_positions[-kills,]
   }
   # Graph generation: (barplot simple one after another.)
@@ -131,6 +132,7 @@ grada_plot_bar_full <- function(PE = TRUE, input="temp/", skip=TRUE, plot_row=2,
     
     # follow line is just for fixing a bug. I need to fix!
     while ((nrow(adapter_positions) - length(kills)) < 2){kills <- head(kills, -1)}
+    # HERE also Error, see above
     adapter_positions <- adapter_positions[-kills,]
   }
 
