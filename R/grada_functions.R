@@ -14,10 +14,10 @@
 #' @param M_max maximal mismatches allowed (std. 2)
 #' @param output the folder where all data will be created. (std. "temp/")
 #' @param omitMeta if TRUE: only sequences will be analyzed and the rest of the read data omitted. This can be beneficial if sequences are found in the title line. Although fewer lines need to be searched, this option will be slower. (std. FALSE)
-#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()/2)
+#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()%/%2)
 #' @return A Table as .txt of the found sequences (adapters) and .txt files containing reads per sequence and mistake.
 #' @export
-grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_max=2, output= "temp/", omitMeta=FALSE, numCores=detectCores()/2){
+grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_max=2, output= "temp/", omitMeta=FALSE, numCores=detectCores()%/%2){
   ####### Testing function calling #####
   writeLines(paste0("#### GRADA v.1.2 ####\nfun: grada_analyze()\nPaired data: ", PE, "\nR1: ", read1, ", R2: ", read2,"\nSequences: ", seq, "\nFrom ", M_min, " to ", M_max, " mismatches\n\nSave to: ", output, "\n#####################\n"))
   # Test if Unix commands are available:
@@ -42,10 +42,12 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
 
   #############################
   
-  ### CHECK NAMES ###
+  ### CHECK NAMES and INPUT###
   read1 <- trimws(read1)
   if(PE){read2 <- trimws(read2)}
-
+  
+  if(numCores == 0){numCores <- 1}
+  
   ##### INIT #####
   adapters <- matrix(ncol = 3, nrow = 0)
   colnames(adapters) <- c("Adapter", "Sequence", "Length")
@@ -168,15 +170,20 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
 #' @param PE paired data? TRUE / FALSE (std. TRUE)
 #' @param readlength longest read! for X-axis. (std. 150)
 #' @param input input folder where the "grada_table.txt" is (output from grada_table())
-#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()/2)
+#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()%/%2)
 #' @return Rdata matrix and can be used for your own plots as well.
 #' @export
-grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", numCores=detectCores()/2){
+grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", numCores=detectCores()%/%2){
   missM <- 0 # No Effect until now... (unix awk command has to change)
   #### Size of the rads must be set here!
   writeLines(paste0("#### GRADA v.1.2 ####\nfun: grada_analyze_positions()\nPaired data: ", PE, "\nRead length: ", readlength, "\nInput: ", input, "grada_table.txt\nMismatches", missM, " (fixed)\n#####################\n"))
+  
   #### Test if Unix commands are available:
   if(!length(system("which awk", intern = TRUE)) >= 1){stop("awk seems to be missing on system...")}
+  
+  #### CHECK INPUT ####
+  if(numCores == 0){numCores <- 1}
+  
   #### begin with analysis:
   adapter_positions <- matrix(ncol = readlength, nrow = 0)
   colnames(adapter_positions) <- c(1:readlength)
