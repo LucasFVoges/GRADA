@@ -12,13 +12,14 @@ grada_analyze(
   M_min = 0,
   M_max = 2,
   output = "temp/",
-  numCores = detectCores()/2
+  omitMeta = FALSE,
+  numCores = detectCores()\%/\%2
 )
 }
 \arguments{
 \item{PE}{paired data? TRUE / FALSE (std. TRUE)}
 
-\item{seq}{"sequence text file" to search for (adapters) (A text file containing 2 lines per Sequence: >AdapterName\n Sequence for example: >IlumniaUniversalAdapter\n AGATCGGAAGAGC") look in examples for an, well, example.}
+\item{seq}{"sequence text file" to search for (adapters) (A text file containing 2 lines per Sequence: 1:>AdapterName 2:Sequence for example: 1:>IlumniaUniversalAdapter 2:AGATCGGAAGAGC") - look in examples for an, well, example.}
 
 \item{read1}{"R1 read file.fastq(.gz)" (std. NULL)}
 
@@ -30,7 +31,9 @@ grada_analyze(
 
 \item{output}{the folder where all data will be created. (std. "temp/")}
 
-\item{numCores}{Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()/2)}
+\item{omitMeta}{if TRUE: only sequences will be analyzed and the rest of the read data omitted. This can be beneficial if sequences are found in the title line. Although fewer lines need to be searched, this option will be slower. (std. FALSE)}
+
+\item{numCores}{Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()\%/\%2)}
 }
 \value{
 A Table as .txt of the found sequences (adapters) and .txt files containing reads per sequence and mistake.
@@ -38,7 +41,7 @@ A Table as .txt of the found sequences (adapters) and .txt files containing read
 \description{
 This function will perform a unix "agrep" and "wc" (and "zcat") to look through the read.fastq(.gz) files.
 It will take more time if used on zipped (.gz) files. Consider to unzip...
-This search will be iteratively done for each mismatch allowed (note: mismatches are only other characters - if the adapter sequence is overlapping it will not be found. No Indels possible at this time). The Mismatches can't be bigger then the shortest sequence!
+This search will be iteratively done for each mismatch allowed. The number of mismatches can't be higher then the shortest sequence!
 }
 \details{
 ! This works only case sensitive !

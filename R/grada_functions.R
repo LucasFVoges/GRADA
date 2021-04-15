@@ -2,23 +2,24 @@
 #'
 #' This function will perform a unix "agrep" and "wc" (and "zcat") to look through the read.fastq(.gz) files.
 #' It will take more time if used on zipped (.gz) files. Consider to unzip...
-#' This search will be iteratively done for each mismatch allowed (note: mismatches are only other characters - if the adapter sequence is overlapping it will not be found. No Indels possible at this time). The Mismatches can't be bigger then the shortest sequence!
+#' This search will be iteratively done for each mismatch allowed. The number of mismatches can't be higher then the shortest sequence!
 #' 
 #' ! This works only case sensitive !
 #'
 #' @param PE paired data? TRUE / FALSE (std. TRUE)
-#' @param seq "sequence text file" to search for (adapters) (A text file containing 2 lines per Sequence: >AdapterName\n Sequence for example: >IlumniaUniversalAdapter\n AGATCGGAAGAGC") look in examples for an, well, example.
+#' @param seq "sequence text file" to search for (adapters) (A text file containing 2 lines per Sequence: 1:>AdapterName 2:Sequence for example: 1:>IlumniaUniversalAdapter 2:AGATCGGAAGAGC") - look in examples for an, well, example.
 #' @param read1 "R1 read file.fastq(.gz)" (std. NULL)
 #' @param read2 "R2 read file.fastq(.gz)" (if paired data, std. NULL)
 #' @param M_min minimal mismatches allowed (std. 0)
 #' @param M_max maximal mismatches allowed (std. 2)
 #' @param output the folder where all data will be created. (std. "temp/")
-#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()/2)
+#' @param omitMeta if TRUE: only sequences will be analyzed and the rest of the read data omitted. This can be beneficial if sequences are found in the title line. Although fewer lines need to be searched, this option will be slower. (std. FALSE)
+#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()%/%2)
 #' @return A Table as .txt of the found sequences (adapters) and .txt files containing reads per sequence and mistake.
 #' @export
-grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_max=2, output= "temp/", numCores=detectCores()/2){
+grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_max=2, output= "temp/", omitMeta=FALSE, numCores=detectCores()%/%2){
   ####### Testing function calling #####
-  writeLines(paste0("#### GRADA v.1.2 ####\nfun: grada_table()\nPaired data: ", PE, "\nR1: ", read1, ", R2: ", read2,"\nSequences: ", seq, "\nFrom ", M_min, " to ", M_max, " mismatches\n\nSave to: ", output, "\n#####################\n"))
+  writeLines(paste0("#### GRADA v.1.2 ####\nfun: grada_analyze()\nPaired data: ", PE, "\nR1: ", read1, ", R2: ", read2,"\nSequences: ", seq, "\nFrom ", M_min, " to ", M_max, " mismatches\n\nSave to: ", output, "\n#####################\n"))
   # Test if Unix commands are available:
   if(!length(system("which agrep", intern = TRUE)) >= 1){stop("agrep seems to be missing on system...")}
   if(!length(system("which wc", intern = TRUE)) >= 1){stop("wc seems to be missing on system...")}
@@ -40,7 +41,13 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
   }
 
   #############################
-
+  
+  ### CHECK NAMES and INPUT###
+  read1 <- trimws(read1)
+  if(PE){read2 <- trimws(read2)}
+  
+  if(numCores == 0){numCores <- 1}
+  
   ##### INIT #####
   adapters <- matrix(ncol = 3, nrow = 0)
   colnames(adapters) <- c("Adapter", "Sequence", "Length")
@@ -75,23 +82,43 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
 
   # writing reads :
   find_adap_read <- function(Rnum, adapter, Mnum){
+    ### This part handles if the read file or the temp files are used:
     if (Mnum == M_max){
       if (Rnum == 1){read <- read1} else {read <- read2}
       # check if file is compressed:
-      if(substr(trimws(read), nchar(trimws(read))-2, nchar(trimws(read))) == ".gz"){
+      if(substr(read, nchar(read)-2, nchar(read)) == ".gz"){
         compressed <- TRUE
       } else {
         compressed <- FALSE
       }
+      # check if omitMeta:
+      if(omitMeta){
+        omit <- TRUE
+      } else{
+        omit <- FALSE
+      }
     } else {
       read <- paste0(output, "temp_R", Rnum, "_", adapter, "_M", Mnum+1, ".txt")
       compressed <- FALSE
+      omit <- FALSE
     }
-    # This is the AGREP Unix function for finding the sequences:
-    if(!compressed){system(paste0("agrep -", Mnum, " " , adapter, " '", read, "' > ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)} else {
-    # If compressed file is used:
-    system(paste0("zcat '", read, "' | agrep -", Mnum, " " , adapter, " > ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)}
-    # This is the counting Unix wc function:
+      
+    ### the AGREP Unix function ###
+    if(!compressed && !omit){
+      system(paste0("agrep -", Mnum, " " , adapter, " '", read, "' > ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)
+      } else {
+        ### Make the omit/compressed string:
+        if(compressed && omit){
+          pipestringA <- paste0("zcat '", read, "' | sed '/^$/d' | awk 'NR % 4 == 2' | ")
+        } else if (compressed && !omit){
+          pipestringA <- paste0("zcat '", read, "' | ")
+        } else if (!compressed && omit){
+          pipestringA <- paste0("sed '/^$/d' '", read, "' | awk 'NR % 4 == 2' | ")
+        }
+        system(paste0(pipestringA, "agrep -", Mnum, " " , adapter, " > ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)
+      }
+    
+    # This is the unix wc counting function:
     system(paste0("wc -l ", output, "temp_R", Rnum, "_", adapter,"_M", Mnum, ".txt | cut -f1 -d' ' > ", output, "counts_temp_R", Rnum, "_", adapter,"_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)
   }
 
@@ -143,15 +170,20 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
 #' @param PE paired data? TRUE / FALSE (std. TRUE)
 #' @param readlength longest read! for X-axis. (std. 150)
 #' @param input input folder where the "grada_table.txt" is (output from grada_table())
-#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()/2)
+#' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()%/%2)
 #' @return Rdata matrix and can be used for your own plots as well.
 #' @export
-grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", numCores=detectCores()/2){
+grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", numCores=detectCores()%/%2){
   missM <- 0 # No Effect until now... (unix awk command has to change)
   #### Size of the rads must be set here!
-  writeLines(paste0("#### GRADA v.1.2 ####\nfun: grada_plot()\nPaired data: ", PE, "\nRead length: ", readlength, "\nInput: ", input, "grada_table.txt\nMismatches", missM, " (fixed)\n#####################\n"))
+  writeLines(paste0("#### GRADA v.1.2 ####\nfun: grada_analyze_positions()\nPaired data: ", PE, "\nRead length: ", readlength, "\nInput: ", input, "grada_table.txt\nMismatches", missM, " (fixed)\n#####################\n"))
+  
   #### Test if Unix commands are available:
   if(!length(system("which awk", intern = TRUE)) >= 1){stop("awk seems to be missing on system...")}
+  
+  #### CHECK INPUT ####
+  if(numCores == 0){numCores <- 1}
+  
   #### begin with analysis:
   adapter_positions <- matrix(ncol = readlength, nrow = 0)
   colnames(adapter_positions) <- c(1:readlength)
