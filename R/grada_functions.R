@@ -182,12 +182,13 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
 #' This function will count the 1. positions of the sequences found in grada_table. Therefore grada_table needs to be run prior. It will only search for mismatches = 0.
 #'
 #' @param PE paired data? TRUE / FALSE (std. TRUE)
-#' @param readlength longest read! for X-axis. (std. 150)
+#' @param readlength longest read! for x-axis. (std. 150)
 #' @param input input folder where the "grada_table.txt" is (output from grada_table())
+#' @param keepfiles if FALSE: delete the temp files from grada_analyze (std. FALSE)
 #' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()%/%2)
 #' @return Rdata matrix and can be used for your own plots as well.
 #' @export
-grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", numCores=detectCores()%/%2){
+grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", keepfiles=FALSE, numCores=detectCores()%/%2){
   missM <- 0 # No Effect until now... (unix awk command has to change)
   #### Size of the rads must be set here!
   writeLines(paste0("#### GRADA v.1.2 ####\nfun: grada_analyze_positions()\nPaired data: ", PE, "\nRead length: ", readlength, "\nInput: ", input, "grada_table.txt\nMismatches", missM, " (fixed)\n#####################\n"))
@@ -247,7 +248,7 @@ grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", 
     if (PE){Rnum <- 1:2} else {Rnum <- 1:1}
     for (R in Rnum){
       load(paste0(input, paste0("Adapter_Positions_R", R ,"_", adapter_i, "_M", missM, ".Rdata")))
-      adapter_positions <- rbind(adapter_positions, poscount)
+      adapter_positions <- rbind(adapter_positions, poscount[1:readlength])
       # Change Rowname to Adapter
       row.names(adapter_positions)[nrow(adapter_positions)] <- paste0(as.character(adapters[, "Adapter"][adapters[,"Sequence"] == adapter_i]), " R_", R)
     }
@@ -258,6 +259,9 @@ grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", 
 
   #### Delete temp files ####
   system(paste0("rm ", input, "Adapter_Positions_*"), intern = FALSE)
+  if (!keepfiles) {
+    system(paste0("rm ", input, "temp_R*"), intern = FALSE)
+  }
 
  writeLines(paste0("GRADA has analyzed the positions!\n"))
 }

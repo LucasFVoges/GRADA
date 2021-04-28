@@ -8,15 +8,18 @@ grada_analyze_positions(
   PE = TRUE,
   readlength = 150,
   input = "temp/",
+  keepfiles = FALSE,
   numCores = detectCores()\%/\%2
 )
 }
 \arguments{
 \item{PE}{paired data? TRUE / FALSE (std. TRUE)}
 
-\item{readlength}{longest read! for X-axis. (std. 150)}
+\item{readlength}{longest read! for x-axis. (std. 150)}
 
 \item{input}{input folder where the "grada_table.txt" is (output from grada_table())}
+
+\item{keepfiles}{if FALSE: delete the temp files from grada_analyze (std. FALSE)}
 
 \item{numCores}{Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()\%/\%2)}
 }

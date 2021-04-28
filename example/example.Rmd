@@ -49,6 +49,7 @@ grada_analyze(
   M_min = 0,                  # minimal mismatches (0 is required for plotting.)
   M_max = 2,                  # maximal mismatches
   output = "temp/example/",   # the folder for the created data (will be large)
+  keepfiles = TRUE,           # keep them for analyze_positions! (can be deleted on the fly for very big data...)
   numCores = detectCores()/2  # parallel computing (will be slow at "1")
 )
 
@@ -56,11 +57,12 @@ grada_analyze_positions(
   PE = FALSE,
   readlength = 150,           # this option is needed, it is the maximal read length.
   input = "temp/example/",    # grada_table.txt should be here! 
-  numCores = detectCores()/2
+  numCores = detectCores()/2,
+  keepfiles = FALSE           # the tempoary files will be deleted now!
 )
 ```
 
-> readlength = 150: the nice thing is, that this will be used for plotting. So you can use a different number here! In this example the "TGCTGC" tail is after the 150 nt. So you can put readlength = 200 to see them in the plot! *will be removed or set automatically in the future*
+> readlength = 150: the thing is, that this will be used for plotting. So you can use a different number here! In this example the "TGCTGC" tail is after the 150 nt. So you can put readlength = 200 to see them in the plot! (it is not bad, if you choose a smaller readlength. Though you will just see the read up to this position...)
 >
 > will give warning: "number of columns of result is not a multiple of vector length (arg 2)" if set lower then max read length.
 
