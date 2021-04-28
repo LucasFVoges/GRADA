@@ -14,10 +14,11 @@
 #' @param M_max maximal mismatches allowed (std. 2)
 #' @param output the folder where all data will be created. (std. "temp/")
 #' @param omitMeta if TRUE: only sequences will be analyzed and the rest of the read data omitted. This can be beneficial if sequences are found in the title line. Although fewer lines need to be searched, this option will be slower. (std. FALSE)
+#' @param keepfiles if FALSE: will delete temp files after counting. Note that analyze_positions is depending on these files! But this could save disk space in case of big files or adapter lists. (std. TRUE)
 #' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()%/%2)
 #' @return A Table as .txt of the found sequences (adapters) and .txt files containing reads per sequence and mistake.
 #' @export
-grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_max=2, output= "temp/", omitMeta=FALSE, numCores=detectCores()%/%2){
+grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_max=2, output= "temp/", omitMeta=FALSE, keepfiles=TRUE, numCores=detectCores()%/%2){
   ####### Testing function calling #####
   writeLines(paste0("#### GRADA v.1.2 ####\nfun: grada_analyze()\nPaired data: ", PE, "\nR1: ", read1, ", R2: ", read2,"\nSequences: ", seq, "\nFrom ", M_min, " to ", M_max, " mismatches\n\nSave to: ", output, "\n#####################\n"))
   # Test if Unix commands are available:
@@ -120,6 +121,18 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
     
     # This is the unix wc counting function:
     system(paste0("wc -l ", output, "temp_R", Rnum, "_", adapter,"_M", Mnum, ".txt | cut -f1 -d' ' > ", output, "counts_temp_R", Rnum, "_", adapter,"_M", Mnum, ".txt"), intern = FALSE, wait = TRUE)
+    # Remove orig temp_ file if keepfiles=FALSE
+    if (!keepfiles) {
+      # Delete previous file?
+      if (!Mnum == M_max) {
+        Mnum_del <- Mnum + 1
+        system(paste0("rm ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum_del, ".txt"), intern = FALSE)
+      }
+      # Delete actual file?
+      if (Mnum == M_min) {
+        system(paste0("rm ", output, "temp_R", Rnum, "_", adapter, "_M", Mnum, ".txt"), intern = FALSE)
+      }
+    }
   }
 
   write_adap_read <- function(adapter){
@@ -140,6 +153,7 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
     } else {
     mclapply(adapters[,"Sequence"], write_adap_read, mc.silent = TRUE, mc.cores = numCores)
     }
+  
   ##### saving the count files to the list #####
   if (PE) {Rnum <- 2} else {Rnum <- 1}
   for (R in 1:Rnum) {

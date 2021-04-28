@@ -25,7 +25,7 @@ First the data is to be analyzed with GRADA. in the following the analyze functi
 ---
 
 seq_adapter.txt file:
-```{txt}
+```{DO_NOT_RUN eval=FALSE}
 >My_adapter               # Name has to start with ">"
 ACTTCTGGACT
 >AGA Adapter

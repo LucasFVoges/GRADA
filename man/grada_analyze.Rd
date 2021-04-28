@@ -13,6 +13,7 @@ grada_analyze(
   M_max = 2,
   output = "temp/",
   omitMeta = FALSE,
+  keepfiles = TRUE,
   numCores = detectCores()\%/\%2
 )
 }
@@ -32,6 +33,8 @@ grada_analyze(
 \item{output}{the folder where all data will be created. (std. "temp/")}
 
 \item{omitMeta}{if TRUE: only sequences will be analyzed and the rest of the read data omitted. This can be beneficial if sequences are found in the title line. Although fewer lines need to be searched, this option will be slower. (std. FALSE)}
+
+\item{keepfiles}{if FALSE: will delete temp files after counting. Note that analyze_positions is depending on these files! But this could save disk space in case of big files or adapter lists. (std. TRUE)}
 
 \item{numCores}{Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()\%/\%2)}
 }
