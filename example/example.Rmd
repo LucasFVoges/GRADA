@@ -58,7 +58,9 @@ grada_analyze_positions(
   readlength = 150,           # this option is needed, it is the maximal read length.
   input = "temp/example/",    # grada_table.txt should be here! 
   numCores = detectCores()/2,
-  keepfiles = FALSE           # the tempoary files will be deleted now!
+  keepfiles = TRUE,           # the temporary files (from before) will be kept!
+  M_min = 1, 
+  M_max = 2
 )
 ```
 
@@ -67,7 +69,7 @@ grada_analyze_positions(
 > will give warning: "number of columns of result is not a multiple of vector length (arg 2)" if set lower then max read length.
 
 ## What is needed afterwards?
-GRADA will produce some tempoary files, which you can use for your own analysis. But if not needed anymore, you may want to delete it (takes some space!). Please note, that if analyzed again, all files **will be overwritten**.
+GRADA will produce some temporary files, which you can use for your own analysis. But if not needed anymore, you may want to delete it (takes some space!). Please note, that if analyzed again, all files **will be overwritten**.
 
 > The file "grada_table.txt" is needed for the table creation and can be loaded in other programs. it is just the text based output of the analysis.  
 >
@@ -104,6 +106,6 @@ grada_table_simple(input = "temp/example/")   # needs (kable, knitr)
 ```{r, eval=TRUE}
 library(GRADA)
 
-grada_plot_bar(PE = FALSE, skip = TRUE, input = "temp/example/")
-grada_plot_bar_full(PE = FALSE, skip = TRUE, input = "temp/example/")
+grada_plot_bar(PE = FALSE, skip = TRUE, input = "temp/example/", M_min = 2, M_max=0)
+grada_plot_bar_full(PE = FALSE, skip = TRUE, input = "temp/example/", M_min = 2, M_max=0)
 ```

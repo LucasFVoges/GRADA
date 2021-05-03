@@ -8,6 +8,8 @@ grada_analyze_positions(
   PE = TRUE,
   readlength = 150,
   input = "temp/",
+  M_min = 0,
+  M_max = 0,
   keepfiles = FALSE,
   numCores = detectCores()\%/\%2
 )
@@ -19,6 +21,10 @@ grada_analyze_positions(
 
 \item{input}{input folder where the "grada_table.txt" is (output from grada_table())}
 
+\item{M_min}{minimal mismatches (std. 0)}
+
+\item{M_max}{maximal mismatches (std. 0)}
+
 \item{keepfiles}{if FALSE: delete the temp files from grada_analyze (std. FALSE)}
 
 \item{numCores}{Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()\%/\%2)}
@@ -27,5 +33,5 @@ grada_analyze_positions(
 Rdata matrix and can be used for your own plots as well.
 }
 \description{
-This function will count the 1. positions of the sequences found in grada_table. Therefore grada_table needs to be run prior. It will only search for mismatches = 0.
+This function will count the 1. positions of the sequences found in grada_table. Therefore grada_analyze needs to be run prior, with appropriate mismatches (-).
 }

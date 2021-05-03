@@ -22,17 +22,22 @@ grada_plot <- function(){
 #'
 #' @param PE paired data? TRUE / FALSE (std. TRUE)
 #' @param input input folder where the "adapter_Positions.Rdata" is (output from grada_analyze_positions() std. "temp/")
+#' @param M_min min mismatches. (not more than 5 plots allowed)
+#' @param M_max max mismatches. (not more than 5 plots allowed)
 #' @param skip if TRUE, it will skip plots for empty Data (if adapter is not found) so you will not get empty plots (sometimes it happens that the first plost is present anyway. this is due to a matrix R-command). (std. TRUE)
 #' @param plot_row is the par(mfrow=c(plot_row,plot_col)) for arrenging the plots (std. 2)
 #' @param plot_col is the par(mfrow=c(plot_row,plot_col)) for arrenging the plots (std. 2)
 #' @return R barplots of the adapter positions.
 #' @export
-grada_plot_bar <- function(PE = TRUE, input="temp/", skip=TRUE, plot_row=2, plot_col=2){
-  missM <- 0 # No Effect until now... (unix awk command has to change)
+grada_plot_bar <- function(PE = TRUE, input="temp/", M_min=0, M_max=0, skip=TRUE, plot_row=2, plot_col=2){
+  if (M_max - M_min > 4){
+    stop("That are too many mismatches!")
+  }
+  missM <- M_min # DEBUG ONLY
 
   #### Load Data ####
   if (substr(input, nchar(input) - 1 + 1, nchar(input)) == "/"){
-    load(paste0(input, "Adapter_Positions.Rdata"))  
+    load(paste0(input, "Adapter_Positions_M", missM, ".Rdata"))  
   } else {
     stop("input folder problem. (Please add '/' to the end)")
   }
@@ -101,7 +106,10 @@ grada_plot_bar_full <- function(PE = TRUE, input="temp/", skip=TRUE, plot_row=2,
   
   #### Load Data ####
   if (substr(input, nchar(input) - 1 + 1, nchar(input)) == "/"){
-    load(paste0(input, "Adapter_Positions.Rdata"))  
+    #
+    #   !    !    ! Ja auch hier anpassen!
+    #
+    load(paste0(input, "Adapter_Positions_M", missM ,".Rdata"))  
     adapter_content <- read.table(paste0(input, "grada_table.txt"), header = TRUE, row.names = 1)
   } else {
     stop("input folder problem. (Please add '/' to the end)")

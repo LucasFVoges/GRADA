@@ -7,6 +7,8 @@
 grada_plot_bar(
   PE = TRUE,
   input = "temp/",
+  M_min = 0,
+  M_max = 0,
   skip = TRUE,
   plot_row = 2,
   plot_col = 2
@@ -16,6 +18,10 @@ grada_plot_bar(
 \item{PE}{paired data? TRUE / FALSE (std. TRUE)}
 
 \item{input}{input folder where the "adapter_Positions.Rdata" is (output from grada_analyze_positions() std. "temp/")}
+
+\item{M_min}{min mismatches. (not more than 5 plots allowed)}
+
+\item{M_max}{max mismatches. (not more than 5 plots allowed)}
 
 \item{skip}{if TRUE, it will skip plots for empty Data (if adapter is not found) so you will not get empty plots (sometimes it happens that the first plost is present anyway. this is due to a matrix R-command). (std. TRUE)}
 
