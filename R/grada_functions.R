@@ -22,15 +22,20 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
   ####### Testing function calling #####
   writeLines(paste0("#### GRADA v.1.2 ####\nfun: grada_analyze()\nPaired data: ", PE, "\nR1: ", read1, ", R2: ", read2,"\nSequences: ", seq, "\nFrom ", M_min, " to ", M_max, " mismatches\n\nSave to: ", output, "\n#####################\n"))
   # Test if Unix commands are available:
-  if(!length(system("which agrep", intern = TRUE)) >= 1){stop("agrep seems to be missing on system...")}
-  if(!length(system("which wc", intern = TRUE)) >= 1){stop("wc seems to be missing on system...")}
-  if(!length(system("which zcat", intern = TRUE)) >= 1){stop("zcat seems to be missing on system...")}
+  if(!length(system("which agrep", intern = TRUE)) >= 1){stop("X - 'agrep' seems to be missing on system...")}
+  if(!length(system("which wc", intern = TRUE)) >= 1){stop("X - 'wc' seems to be missing on system...")}
+  if(!length(system("which zcat", intern = TRUE)) >= 1 && omitMeta == TRUE){stop("X - 'zcat' seems to be missing on system...")}
   # Test if input is acceptable:
-  if (is.null(read1)){stop("No data file (read1 = ?)")}
-  if (M_min < 0){stop("You have entered a negative number...")}
-  if (M_min > M_max){stop("minimum mismatches can't be higher then maximum!")}
-  if (PE == TRUE && is.null(read2) == TRUE){stop("No paired data supplied?")}
-  if (M_max - M_min > 5){print("WARNING: this will take time and space! (many mismatches...)")}
+  if (is.null(read1)){stop("X - No data file (read1 = ?)")}
+  if (M_min < 0){stop("X - You have entered a negative number...")}
+  if (M_max > 8){
+    M_max <- 8
+    writeLines("! - M_max was corrected to 8, which is the maximum supported by agrep.\n")
+  }
+  if (M_min > M_max){stop("X - Minimum mismatches can't be higher then maximum!")}
+ 
+  if (PE == TRUE && is.null(read2) == TRUE){stop("X - No paired data supplied?")}
+  if (M_max - M_min > 5){print("! - This will take time and space! (many mismatches...)")}
 
   ####### USER INPUT ##########
 
@@ -229,32 +234,28 @@ grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", 
     if (missM > 0) {
       regex_string <- ""
       length_adapter <- nchar(adapter)
+      char_adapter <- strsplit(adapter, "")[[1]]
       # This will look in the pascal triangle for max number of possible combinations:
       # Old: pt_possibils <- lapply(length_adapter, function(i) choose(i, missM))[[1]]
       pt_possibils <- choose(length_adapter, missM)
       # the combinations are available via combn()
-      pt_combinations <- combn(1:length_adapter, missM)    # error if missM higher than length of adapter!
+      pt_combinations <- combn(1:length_adapter, missM, simplify = TRUE)    # error if missM higher than length of adapter!
       # generate the adapter regex: 
       for (possibles in 1:pt_possibils) {
-        n <- 1  # num value for base
-        for (base in strsplit(adapter, "")[[1]]) {
-          if (n %in% pt_combinations[,possibles]) {
-            if (n == length_adapter) {
-              regex_string <- paste0(regex_string, ".{0,1}")  # because insertion at the end is pointless.
-            } else { 
-              regex_string <- paste0(regex_string, "(.{0,1}|", base, ".)") # This allown Indels as well. Without it would be just "."
-            }
-          } else {
-            regex_string <- paste0(regex_string, base)
+        this_char_adapter <- char_adapter
+        for (this_pos in pt_combinations[,possibles]){
+          if (this_pos == length_adapter) {
+            # because insertion at the end is pointless.
+            this_char_adapter[this_pos] <- ".{0,1}" 
+          } else { 
+            # This allown Indels as well. Without it would be just "."
+            this_char_adapter[this_pos] <- paste0("(.{0,1}|", char_adapter[this_pos], ".)") 
           }
-          n <- n + 1
-        }
-        if (!possibles == pt_possibils) {          # so in the end is no "|"
-          regex_string <- paste0(regex_string, "|")
-        }
-        if (possibles %% 100 == 0 || possibles == pt_possibils) {
-          print(paste0("regex for ", missM, " mism.: ", possibles, " of ", pt_possibils, " combinations!"))
         }  
+        regex_string <- paste0(regex_string, paste0(this_char_adapter, collapse = ""), "|")
+        if (possibles == pt_possibils) {          # so in the end is no "|"
+          regex_string <- substr(regex_string, 1, nchar(regex_string)-1)
+        }
       }  
     } else if (missM == 0){
       regex_string <- adapter

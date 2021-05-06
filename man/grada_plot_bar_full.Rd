@@ -9,7 +9,8 @@ grada_plot_bar_full(
   input = "temp/",
   skip = TRUE,
   plot_row = 2,
-  plot_col = 2
+  plot_col = 2,
+  colour = 2
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ grada_plot_bar_full(
 \item{plot_row}{is the par(mfrow=c(plot_row,plot_col)) for arrenging the plots (std. 2)}
 
 \item{plot_col}{is the par(mfrow=c(plot_row,plot_col)) for arrenging the plots (std. 2)}
+
+\item{colour}{colour scheme for plot. (1 = std. / 2 = colorblind / 3 = black and white)}
 }
 \value{
 R barplots of the adapter positions.

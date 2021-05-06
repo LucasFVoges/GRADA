@@ -59,7 +59,7 @@ grada_analyze_positions(
   input = "temp/example/",    # grada_table.txt should be here! 
   numCores = detectCores()/2,
   keepfiles = TRUE,           # the temporary files (from before) will be kept!
-  M_min = 1, 
+  M_min = 0, 
   M_max = 2
 )
 ```
@@ -106,6 +106,7 @@ grada_table_simple(input = "temp/example/")   # needs (kable, knitr)
 ```{r, eval=TRUE}
 library(GRADA)
 
-grada_plot_bar(PE = FALSE, skip = TRUE, input = "temp/example/", M_min = 2, M_max=0)
-grada_plot_bar_full(PE = FALSE, skip = TRUE, input = "temp/example/", M_min = 2, M_max=0)
+grada_plot_bar(PE = FALSE, skip = FALSE, input = "temp/example/", colour = 1, M_min = 0, M_max=2, plot_row = 1, plot_col = 1)
+grada_plot_bar(PE = FALSE, skip = FALSE, full_length = TRUE, input = "temp/example/", colour = 1, M_min = 0, M_max=2, plot_row = 1, plot_col = 1)
 ```
+

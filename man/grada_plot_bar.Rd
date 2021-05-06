@@ -9,13 +9,15 @@ grada_plot_bar(
   input = "temp/",
   M_min = 0,
   M_max = 0,
-  skip = TRUE,
+  full_length = FALSE,
+  skip = FALSE,
   plot_row = 2,
-  plot_col = 2
+  plot_col = 2,
+  colour = 1
 )
 }
 \arguments{
-\item{PE}{paired data? TRUE / FALSE (std. TRUE)}
+\item{PE}{paired data? TRUE / FALSE (std. TRUE) (obsolete option. is no longer used)}
 
 \item{input}{input folder where the "adapter_Positions.Rdata" is (output from grada_analyze_positions() std. "temp/")}
 
@@ -23,11 +25,15 @@ grada_plot_bar(
 
 \item{M_max}{max mismatches. (not more than 5 plots allowed)}
 
-\item{skip}{if TRUE, it will skip plots for empty Data (if adapter is not found) so you will not get empty plots (sometimes it happens that the first plost is present anyway. this is due to a matrix R-command). (std. TRUE)}
+\item{full_length}{if TRUE it will plot all positions of the adapter (instead of the first pos only) (std. FALSE)}
+
+\item{skip}{if TRUE, it will skip plots for empty Data, so you will not get empty plots. (std. FALSE)}
 
 \item{plot_row}{is the par(mfrow=c(plot_row,plot_col)) for arrenging the plots (std. 2)}
 
 \item{plot_col}{is the par(mfrow=c(plot_row,plot_col)) for arrenging the plots (std. 2)}
+
+\item{colour}{colour scheme for plot. (1 = std. / 2 = differen / 3 = black and white) or you can use your own in the format: colour = c("red", "blue", #FFFFFF ...)}
 }
 \value{
 R barplots of the adapter positions.
@@ -36,7 +42,8 @@ R barplots of the adapter positions.
 This function will plot the results of grada_analyze_positions() which are stored in "Adapter_Positions.Rdata"
 }
 \details{
-The first position of the found Sequence will be plotted! If the read is 100 bases long and the adapter 10, the maximal position will therefore be 91!
+standard: The first position of the found Sequence will be plotted! If the read is 100 bases long and the adapter 10, the maximal position will therefore be 91!
+full_length = TRUE will set this plot to use all adapter positions. In the above mentioned example: 91,92,93,94,95,96,97,98,99,100 will be counted. Be aware, that this will not take into account any indel mismatches.
 
 plots will be skipped if no adapters are found. If there are any difficulties with this function, may set skip to FALSE.
 }
