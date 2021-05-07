@@ -2,7 +2,7 @@
 #'
 #' This function will perform a unix "agrep" and "wc" (and "zcat") to look through the read.fastq(.gz) files.
 #' It will take more time if used on zipped (.gz) files. Consider to unzip...
-#' This search will be iteratively done for each mismatch allowed. The number of mismatches can't be higher then the shortest adapter sequence!
+#' This search will be iteratively done for each mismatch allowed. The number of mismatches can't be equal or higher then the shortest adapter sequence!
 #' 
 #' ! This works only case sensitive !
 #'
@@ -184,18 +184,19 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
 
 #' GRADA - Analyze Positions
 #'
-#' This function will count the 1. positions of the sequences found in grada_table. Therefore grada_analyze needs to be run prior, with appropriate mismatches (-).
+#' This function will count the 1. positions of the sequences found in grada_table. Therefore grada_analyze needs to be run prior, with appropriate mismatches (-). Although mismatches can be analyzed, it is not recommended to use more than 3 mismatches. GRADA will give you a hint if the mismatch analysis is not possible. (A search without indels can be helpful)
 #'
 #' @param PE paired data? TRUE / FALSE (std. TRUE)
 #' @param readlength longest read! for x-axis. (std. 150)
 #' @param input input folder where the "grada_table.txt" is (output from grada_table())
 #' @param M_min minimal mismatches (std. 0) 
 #' @param M_max maximal mismatches (std. 0)
+#' @param indels TRUE: This will allow indels. FALSE: This will search only for SNPs (will not be the same as in grada_analyze(), wich always search for indels.)
 #' @param keepfiles if FALSE: delete the temp files from grada_analyze (std. FALSE)
 #' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()%/%2)
 #' @return Rdata matrix and can be used for your own plots as well.
 #' @export
-grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", M_min=0, M_max=0, keepfiles=FALSE, numCores=detectCores()%/%2){
+grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", M_min=0, M_max=0, indels=TRUE, keepfiles=FALSE, numCores=detectCores()%/%2){
   #### Size of the rads must be set here!
   writeLines(paste0("#### GRADA v.1.2 ####\nfun: grada_analyze_positions()\nPaired data: ", PE, "\nRead length: ", readlength, "\nInput: ", input, "grada_table.txt\nMismatches ", M_min, " to ", M_min,  "\n#####################\n"))
   
@@ -211,11 +212,22 @@ grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", 
   if (!(file.exists(paste0(input, "grada_table.txt")))){stop("could not find grada_table.txt - pleas run grada_table() first.")}
   adapters <- read.table(paste0(input, "grada_table.txt"), header = TRUE)
   
-  ###!!!!! DAS IST NICHT MEHR KORREKT! - auch andere mismatches allowed!  
-  if (!(file.exists(paste0(input, "temp_R1_", adapters[1,"Sequence"], "_M0.txt")))){stop("File with 0 mismatches not available!?")}
-  if (PE){
-    if (!(file.exists(paste0(input, "temp_R2_", adapters[1,"Sequence"], "_M0.txt")))){stop("File with 0 mismatches not available for R2 reads!?")}
+  for (MMs in M_max:M_min) {
+    if (!(file.exists(paste0(input, "temp_R1_", adapters[1,"Sequence"], "_M", MMs ,".txt")))){
+      stop(paste0("R1-File with ", MMs, " mismatches not available!?"))
+    }
+    if (PE){
+      if (!(file.exists(paste0(input, "temp_R2_", adapters[1,"Sequence"], "_M", MMs ,".txt")))){
+        stop(paste0("R2-File with ", MMs, " mismatches not available!?"))
+      }
+    }
   }
+  
+  if(indels){
+    simplify_regex <- FALSE
+  } else {
+    simplify_regex <- TRUE
+    }
 
   # Function:
   find_positions <- function(adapter){
@@ -231,6 +243,7 @@ grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", 
   find_positions_sec <- function(R, adapter){
     poslist <- c(1:(readlength))                  # "1:" because awk works with "1"
     adapter <- as.character(adapter)
+    skipping <- FALSE
     if (missM > 0) {
       regex_string <- ""
       length_adapter <- nchar(adapter)
@@ -238,25 +251,40 @@ grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", 
       # This will look in the pascal triangle for max number of possible combinations:
       # Old: pt_possibils <- lapply(length_adapter, function(i) choose(i, missM))[[1]]
       pt_possibils <- choose(length_adapter, missM)
+      
+      # Here some info for the regex
+      writeLines(paste0("Regex for: ", missM, " mismatches. Possibilities: ", pt_possibils))
+      # This is just a way to go through, even the regex is to big. It is not a solution for the problem...
+      if (indels){regex_meta <- 10} else {regex_meta <- 0}
+      regex_length <- pt_possibils * (length_adapter + missM * regex_meta) # rough estimate
+      if (regex_length >= 50000){
+        writeLines(paste0("Regex will be to big. ", adapter, " will be skipped for ", missM, " mismatches."))
+        skipping <- TRUE
+      } else {
       # the combinations are available via combn()
       pt_combinations <- combn(1:length_adapter, missM, simplify = TRUE)    # error if missM higher than length of adapter!
       # generate the adapter regex: 
       for (possibles in 1:pt_possibils) {
         this_char_adapter <- char_adapter
         for (this_pos in pt_combinations[,possibles]){
-          if (this_pos == length_adapter) {
-            # because insertion at the end is pointless.
-            this_char_adapter[this_pos] <- ".{0,1}" 
-          } else { 
-            # This allown Indels as well. Without it would be just "."
-            this_char_adapter[this_pos] <- paste0("(.{0,1}|", char_adapter[this_pos], ".)") 
-          }
+          if (!simplify_regex){
+            if (this_pos == length_adapter) {
+              # because insertion at the end is pointless.
+              this_char_adapter[this_pos] <- ".{0,1}" 
+            } else { 
+              # This allown Indels as well. Without it would be just "."
+              this_char_adapter[this_pos] <- paste0("(.{0,1}|", char_adapter[this_pos], ".)") 
+            }
+          } else{
+            this_char_adapter[this_pos] <- "." 
+          }  
         }  
         regex_string <- paste0(regex_string, paste0(this_char_adapter, collapse = ""), "|")
         if (possibles == pt_possibils) {          # so in the end is no "|"
           regex_string <- substr(regex_string, 1, nchar(regex_string)-1)
         }
-      }  
+      }
+     }  
     } else if (missM == 0){
       regex_string <- adapter
     } else {
@@ -265,9 +293,12 @@ grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", 
     
     regex <- paste0("/",regex_string,"/")
     # AWK search for positions:
+    if (skipping){
+      awk_positions <- ""
+    } else {
     awk_positions <- system(intern = TRUE, paste0("awk 'match($0,", regex, ") {s=$0; m=0; while((n=match(s,", regex, "))>0){m+=n; printf \"%s,\", m; m+=", nchar(adapter)-1, "; s=substr(s, n+", nchar(adapter),")}}' ", input, "temp_R", R, "_", adapter, "_M", missM,".txt"))
     # BACKUP: awk_positions <- system(intern = TRUE, paste0("awk -v p=", adapter," 'index($0,p) {s=$0; m=0; while((n=index(s,p))>0){m+=n; printf \"%s,\", m; s=substr(s, n+1)}}' ", input, "temp_R", R, "_", adapter, "_M", missM,".txt"))
-    
+    }
     ###DOCUMENTATION of the awk Command:
     # builds a string: "1,5,..." which are the positions inside the lines!
     # awk -v p=ACTTCTGGACT    # -v allows the variable   | This is not neccesary as seen in example 2!
