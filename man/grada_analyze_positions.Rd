@@ -10,7 +10,6 @@ grada_analyze_positions(
   input = "temp/",
   M_min = 0,
   M_max = 0,
-  indels = TRUE,
   keepfiles = FALSE,
   numCores = detectCores()\%/\%2
 )
@@ -25,8 +24,6 @@ grada_analyze_positions(
 \item{M_min}{minimal mismatches (std. 0)}
 
 \item{M_max}{maximal mismatches (std. 0)}
-
-\item{indels}{TRUE: This will allow indels. FALSE: This will search only for SNPs (will not be the same as in grada_analyze(), wich always search for indels.)}
 
 \item{keepfiles}{if FALSE: delete the temp files from grada_analyze (std. FALSE)}
 

@@ -191,12 +191,11 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
 #' @param input input folder where the "grada_table.txt" is (output from grada_table())
 #' @param M_min minimal mismatches (std. 0) 
 #' @param M_max maximal mismatches (std. 0)
-#' @param indels TRUE: This will allow indels. FALSE: This will search only for SNPs (will not be the same as in grada_analyze(), wich always search for indels.)
 #' @param keepfiles if FALSE: delete the temp files from grada_analyze (std. FALSE)
 #' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()%/%2)
 #' @return Rdata matrix and can be used for your own plots as well.
 #' @export
-grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", M_min=0, M_max=0, indels=TRUE, keepfiles=FALSE, numCores=detectCores()%/%2){
+grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", M_min=0, M_max=0, keepfiles=FALSE, numCores=detectCores()%/%2){
   #### Size of the rads must be set here!
   writeLines(paste0("#### GRADA v.1.2 ####\nfun: grada_analyze_positions()\nPaired data: ", PE, "\nRead length: ", readlength, "\nInput: ", input, "grada_table.txt\nMismatches ", M_min, " to ", M_min,  "\n#####################\n"))
   
@@ -223,23 +222,21 @@ grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", 
     }
   }
   
-  if(indels){
-    simplify_regex <- FALSE
-  } else {
-    simplify_regex <- TRUE
-    }
-
+  # this is for the awk position finding:
+  simplify_regex <- FALSE
+  
   # Function:
   find_positions <- function(adapter){
     if (PE) {Rnum <- 1:2} else {Rnum <- 1:1}
     if (numCores == 1){
-      lapply(Rnum, find_positions_sec, adapter)
+      lapply(Rnum, find_positions_agrep, adapter)
     } else {
-      mclapply(Rnum, find_positions_sec, adapter, mc.cores = tail(Rnum, n=1))
+      mclapply(Rnum, find_positions_agrep, adapter, mc.cores = tail(Rnum, n=1))
     }  
     return(paste0(adapter, " has been prepared for plotting"))
   }
-
+  
+  ### OLD AWK VERSION of POSITIONS with regex!
   find_positions_sec <- function(R, adapter){
     poslist <- c(1:(readlength))                  # "1:" because awk works with "1"
     adapter <- as.character(adapter)
@@ -322,6 +319,35 @@ grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", 
     ### correction loop due to first creation of poslist.
     for (i in 1:readlength) {
       poscount[i] <- poscount[i] -1
+    }
+    save(poscount, file = paste0(input, paste0("Adapter_Positions_R", R, "_", adapter, "_M", missM, ".Rdata")))
+  }
+  
+  find_positions_agrep <- function(R, adapter){
+    poslist <- c(0:(readlength-1))    
+    adapter <- as.character(adapter)
+    length_adapter <- nchar(adapter)
+    agrep_position <- c()
+    lines_of_file <- as.integer(system(intern=TRUE, paste0("wc -l ", input, "temp_R", R, "_", adapter, "_M", missM,".txt | cut -f1 -d' '")))
+    if (lines_of_file > 0) {
+      # The approach with agrep per line:
+      for (readline in 1:lines_of_file) {
+        agrep_position <- c(agrep_position, as.integer(system(intern = TRUE, paste0("sed -n ", readline, "p ", input, "temp_R", R, "_", adapter, "_M", missM,".txt | agrep -", missM, " -b ", adapter, " | cut -f1 -d'='"))) - (length_adapter-1))
+      }
+        
+    } else { # end lines_of_file > 0
+      agrep_position <- c()
+    }
+    
+    ### add vector to poslist
+    poslist <- append(poslist, agrep_position)
+    
+    ### change points to frequency over the readlength nt.
+    poscount <- table(poslist)
+    
+    ### correction loop due to first creation of poslist.
+    for (i in 1:readlength) {
+      poscount[i] <- poscount[i] - 1
     }
     save(poscount, file = paste0(input, paste0("Adapter_Positions_R", R, "_", adapter, "_M", missM, ".Rdata")))
   }
