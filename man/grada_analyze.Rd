@@ -44,7 +44,7 @@ A Table as .txt of the found sequences (adapters) and .txt files containing read
 \description{
 This function will perform a unix "agrep" and "wc" (and "zcat") to look through the read.fastq(.gz) files.
 It will take more time if used on zipped (.gz) files. Consider to unzip...
-This search will be iteratively done for each mismatch allowed. The number of mismatches can't be higher then the shortest sequence!
+This search will be iteratively done for each mismatch allowed. The number of mismatches can't be equal or higher then the shortest adapter sequence!
 }
 \details{
 ! This works only case sensitive !
