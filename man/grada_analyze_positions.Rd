@@ -9,8 +9,9 @@ grada_analyze_positions(
   readlength = 150,
   input = "temp/",
   M_min = 0,
-  M_max = 0,
+  M_max = 2,
   keepfiles = FALSE,
+  method = 1,
   numCores = detectCores()\%/\%2
 )
 }
@@ -23,9 +24,11 @@ grada_analyze_positions(
 
 \item{M_min}{minimal mismatches (std. 0)}
 
-\item{M_max}{maximal mismatches (std. 0)}
+\item{M_max}{maximal mismatches (std. 2)}
 
-\item{keepfiles}{if FALSE: delete the temp files from grada_analyze (std. FALSE)}
+\item{keepfiles}{if FALSE: delete the temp files from grada_analyze() (std. FALSE)}
+
+\item{method}{different implementation of position finding. "R" (1) uses R utils package. "awk" (2) uses unix awk command. (std. 1)}
 
 \item{numCores}{Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()\%/\%2)}
 }
@@ -33,5 +36,8 @@ grada_analyze_positions(
 Rdata matrix and can be used for your own plots as well.
 }
 \description{
-This function will count the 1. positions of the sequences found in grada_table. Therefore grada_analyze needs to be run prior, with appropriate mismatches (-). Although mismatches can be analyzed, it is not recommended to use more than 3 mismatches. GRADA will give you a hint if the mismatch analysis is not possible. (A search without indels can be helpful)
+This function will count the 1. positions of the sequences found in grada_table. Therefore grada_analyze() needs to be run prior, with appropriate mismatches. Although up to 8 mismatches can be analyzed, depending on the size and findings this could take a long time. GRADA uses the utils aregexec() function to find the results. Another possible way is to search with unix "awk". This takes a regular expression (which can be awful long for many mismatches) and therefore will be killed (out of memory?) by the system sometimes!
+}
+\details{
+!method="awk" will search for multiple results in one read (line) method="R" only finds the first occurrence per read (line)
 }

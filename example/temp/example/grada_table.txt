@@ -1,2 +1,5 @@
-"Adapter" "Sequence" "Length" "R1M8" "R1M7" "R1M6" "R1M5" "R1M4" "R1M3" "R1M2" "R1M1" "R1M0"
-"test" "AAAAAAAAAAAAAAAAAA" "18" "20" "19" "19" "3" "0" "0" "0" "0" "0"
+"Adapter" "Sequence" "Length" "R1M3" "R1M2" "R1M1" "R1M0"
+"My_adapter" "ACTTCTGGACT" "11" "16" "12" "9" "7"
+"AGA Adapter" "AGAAGAAGAAGAAGAAGA" "18" "20" "20" "17" "12"
+"Index" "AGAT" "4" "66" "44" "44" "31"
+"TGC-Tail" "TGCTGCTGC" "9" "20" "8" "1" "1"

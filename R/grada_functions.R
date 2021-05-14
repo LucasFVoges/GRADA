@@ -72,13 +72,19 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
       next
     }
     if (line %in% adapters[,"Sequence"]){
-      writeLines(paste0("---\nA doubled sequence: ", line, " is skipped...!\n"))
+      writeLines(paste0("! - A doubled sequence: ", line, " is skipped...!\n"))
       next
-    }  
+    } 
+    if (nchar(line) <= M_max){
+      writeLines("! - An adapter is shorter or equal the M_max mismatches. This adapter will be skipped!\n")
+      next
+    }
     if (adap_name == ""){
-      writeLines("---\nCould not read complete adapter file. There is a formating problem. Please check your adapters!\n")
+      writeLines("! - Could not read complete adapter file. There is a formating problem. Please check your adapters!\n")
       break
     }
+    # Check for too small sequenzes
+
     adapters <- rbind(adapters, c(adap_name, line, nchar(line)))
     adap_name <- ""
   }
@@ -184,23 +190,25 @@ grada_analyze <- function(PE=TRUE, seq=NULL, read1=NULL, read2=NULL, M_min=0, M_
 
 #' GRADA - Analyze Positions
 #'
-#' This function will count the 1. positions of the sequences found in grada_table. Therefore grada_analyze needs to be run prior, with appropriate mismatches (-). Although mismatches can be analyzed, it is not recommended to use more than 3 mismatches. GRADA will give you a hint if the mismatch analysis is not possible. (A search without indels can be helpful)
+#' This function will count the 1. positions of the sequences found in grada_table. Therefore grada_analyze() needs to be run prior, with appropriate mismatches. Although up to 8 mismatches can be analyzed, depending on the size and findings this could take a long time. GRADA uses the utils aregexec() function to find the results. Another possible way is to search with unix "awk". This takes a regular expression (which can be awful long for many mismatches) and therefore will be killed (out of memory?) by the system sometimes!
+#' 
+#' !method="awk" will search for multiple results in one read (line) method="R" only finds the first occurrence per read (line)
 #'
 #' @param PE paired data? TRUE / FALSE (std. TRUE)
 #' @param readlength longest read! for x-axis. (std. 150)
 #' @param input input folder where the "grada_table.txt" is (output from grada_table())
 #' @param M_min minimal mismatches (std. 0) 
-#' @param M_max maximal mismatches (std. 0)
-#' @param keepfiles if FALSE: delete the temp files from grada_analyze (std. FALSE)
+#' @param M_max maximal mismatches (std. 2)
+#' @param keepfiles if FALSE: delete the temp files from grada_analyze() (std. FALSE)
+#' @param method different implementation of position finding. "R" (1) uses R utils package. "awk" (2) uses unix awk command. (std. 1)
 #' @param numCores Number of cores to use. If numCores=1 then the normal lapply function is used and the parallel package is not necessary! (std. detectCores()%/%2)
 #' @return Rdata matrix and can be used for your own plots as well.
 #' @export
-grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", M_min=0, M_max=0, keepfiles=FALSE, numCores=detectCores()%/%2){
+grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", M_min=0, M_max=2, keepfiles=FALSE, method=1, numCores=detectCores()%/%2){
   #### Size of the rads must be set here!
   writeLines(paste0("#### GRADA v.1.2 ####\nfun: grada_analyze_positions()\nPaired data: ", PE, "\nRead length: ", readlength, "\nInput: ", input, "grada_table.txt\nMismatches ", M_min, " to ", M_min,  "\n#####################\n"))
   
-  #### Test if Unix commands are available:
-  if(!length(system("which awk", intern = TRUE)) >= 1){stop("awk seems to be missing on system...")}
+
   
   #### CHECK INPUT ####
   if(numCores == 0){numCores <- 1}
@@ -222,25 +230,46 @@ grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", 
     }
   }
   
-  # this is for the awk position finding:
-  simplify_regex <- FALSE
+  # Method:
+  if (method == 1 || method == "R" || method == "r"){
+    search_method <- 1
+  } else if (method == 2 || method == "awk" || method == "AWK"){
+    search_method <- 2
+  } else {  
+    writeLines("! - Method not detectable. Using 'R' instead.\n###\n")
+    search_method <- 1
+  }
+  
+  #### Test if Unix commands are available:
+  if (search_method == 2){
+    if(!length(system("which awk", intern = TRUE)) >= 1){
+      stop("awk seems to be missing on system...")
+    }
+  }
   
   # Function:
-  find_positions <- function(adapter){
+  find_positions <- function(adapter, missM){
     if (PE) {Rnum <- 1:2} else {Rnum <- 1:1}
-    if (numCores == 1){
-      lapply(Rnum, find_positions_agrep, adapter)
-    } else {
-      mclapply(Rnum, find_positions_agrep, adapter, mc.cores = tail(Rnum, n=1))
+    if (search_method == 2){
+      if (numCores == 1){
+        lapply(Rnum, find_positions_awk, adapter, missM)
+      } else {
+        mclapply(Rnum, find_positions_awk, adapter, missM, mc.cores = tail(Rnum, n=1))
+      }  
+    } else {  
+      if (numCores == 1){
+        lapply(Rnum, find_positions_R, adapter, missM)
+      } else {
+        mclapply(Rnum, find_positions_R, adapter, missM, mc.cores = tail(Rnum, n=1))
+      }  
     }  
     return(paste0(adapter, " has been prepared for plotting"))
   }
   
-  ### OLD AWK VERSION of POSITIONS with regex!
-  find_positions_sec <- function(R, adapter){
+  ### AWK VERSION of POSITIONS with regex!
+  find_positions_awk <- function(R, adapter, missM){
     poslist <- c(1:(readlength))                  # "1:" because awk works with "1"
     adapter <- as.character(adapter)
-    skipping <- FALSE
     if (missM > 0) {
       regex_string <- ""
       length_adapter <- nchar(adapter)
@@ -248,54 +277,43 @@ grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", 
       # This will look in the pascal triangle for max number of possible combinations:
       # Old: pt_possibils <- lapply(length_adapter, function(i) choose(i, missM))[[1]]
       pt_possibils <- choose(length_adapter, missM)
-      
+
       # Here some info for the regex
       writeLines(paste0("Regex for: ", missM, " mismatches. Possibilities: ", pt_possibils))
-      # This is just a way to go through, even the regex is to big. It is not a solution for the problem...
-      if (indels){regex_meta <- 10} else {regex_meta <- 0}
-      regex_length <- pt_possibils * (length_adapter + missM * regex_meta) # rough estimate
-      if (regex_length >= 50000){
-        writeLines(paste0("Regex will be to big. ", adapter, " will be skipped for ", missM, " mismatches."))
-        skipping <- TRUE
-      } else {
       # the combinations are available via combn()
       pt_combinations <- combn(1:length_adapter, missM, simplify = TRUE)    # error if missM higher than length of adapter!
-      # generate the adapter regex: 
+      # generate the adapter regex:
       for (possibles in 1:pt_possibils) {
         this_char_adapter <- char_adapter
         for (this_pos in pt_combinations[,possibles]){
-          if (!simplify_regex){
-            if (this_pos == length_adapter) {
-              # because insertion at the end is pointless.
-              this_char_adapter[this_pos] <- ".{0,1}" 
-            } else { 
-              # This allown Indels as well. Without it would be just "."
-              this_char_adapter[this_pos] <- paste0("(.{0,1}|", char_adapter[this_pos], ".)") 
-            }
-          } else{
-            this_char_adapter[this_pos] <- "." 
-          }  
-        }  
+          if (this_pos == length_adapter) {
+            # because insertion at the end is pointless.
+            this_char_adapter[this_pos] <- ".{0,1}"
+          } else {
+            # This allown Indels as well. Without it would be just "."
+            this_char_adapter[this_pos] <- paste0("(.{0,1}|", char_adapter[this_pos], ".)")
+          }
+        }
         regex_string <- paste0(regex_string, paste0(this_char_adapter, collapse = ""), "|")
         if (possibles == pt_possibils) {          # so in the end is no "|"
           regex_string <- substr(regex_string, 1, nchar(regex_string)-1)
         }
       }
-     }  
     } else if (missM == 0){
       regex_string <- adapter
     } else {
       stop("This should never happen. Error in nr of mismatches. it is not 0 and not higher than 0...?")
     }
     
-    regex <- paste0("/",regex_string,"/")
-    # AWK search for positions:
-    if (skipping){
-      awk_positions <- ""
-    } else {
-    awk_positions <- system(intern = TRUE, paste0("awk 'match($0,", regex, ") {s=$0; m=0; while((n=match(s,", regex, "))>0){m+=n; printf \"%s,\", m; m+=", nchar(adapter)-1, "; s=substr(s, n+", nchar(adapter),")}}' ", input, "temp_R", R, "_", adapter, "_M", missM,".txt"))
-    # BACKUP: awk_positions <- system(intern = TRUE, paste0("awk -v p=", adapter," 'index($0,p) {s=$0; m=0; while((n=index(s,p))>0){m+=n; printf \"%s,\", m; s=substr(s, n+1)}}' ", input, "temp_R", R, "_", adapter, "_M", missM,".txt"))
-    }
+    ### AWK search for positions: (a ".awk" is needed because bash does not allow that long expressions.)
+    awk_string <- paste0(input, "temp_search_R", R, "_", adapter, "_M", missM, ".awk")
+    write(x = paste0("match($0, /", regex_string, "/) {s=$0; m=0; while((n=match(s, /", regex_string, "/))>0){m+=n; printf \"%s,\", m; m+=", nchar(adapter)-1, "; s=substr(s, n+", nchar(adapter),")}}"), file = awk_string)
+    awk_positions <- system(intern = TRUE, paste0("awk -f ", awk_string, " ", input, "temp_R", R, "_", adapter, "_M", missM,".txt"))
+    
+    # BACKUP: awk_positions <- system(intern = TRUE, paste0("awk 'match($0,", regex, ") {s=$0; m=0; while((n=match(s,", regex, "))>0){m+=n; printf \"%s,\", m; m+=", nchar(adapter)-1, "; s=substr(s, n+", nchar(adapter),")}}' ", input, "temp_R", R, "_", adapter, "_M", missM,".txt"))
+    
+    # BACKUP OLD: awk_positions <- system(intern = TRUE, paste0("awk -v p=", adapter," 'index($0,p) {s=$0; m=0; while((n=index(s,p))>0){m+=n; printf \"%s,\", m; s=substr(s, n+1)}}' ", input, "temp_R", R, "_", adapter, "_M", missM,".txt"))
+    
     ###DOCUMENTATION of the awk Command:
     # builds a string: "1,5,..." which are the positions inside the lines!
     # awk -v p=ACTTCTGGACT    # -v allows the variable   | This is not neccesary as seen in example 2!
@@ -306,75 +324,116 @@ grada_analyze_positions <- function(PE = TRUE, readlength = 150, input="temp/", 
     #    m+=n;                # sets m to this position (+= because remaining string starts again at 1)
     #    printf "%s,", m;     # the printing of m
     #    m+= nchar(adapter)-1 # sets M adequate to remaining string.
-    #    s=substr(s, n+nchar(adapter))     # set s to remaining string.  
-    # 
-    
+    #    s=substr(s, n+nchar(adapter))     # set s to remaining string.
+    #
+
     ### build vector
     positions <- as.vector(as.numeric(unlist(strsplit(awk_positions, ","))))
     poslist <- append(poslist, positions)
-    
+
     ### change points to frequency over the readlength nt.
     poscount <- table(poslist)
-    
+
     ### correction loop due to first creation of poslist.
     for (i in 1:readlength) {
       poscount[i] <- poscount[i] -1
     }
     save(poscount, file = paste0(input, paste0("Adapter_Positions_R", R, "_", adapter, "_M", missM, ".Rdata")))
   }
+
   
-  find_positions_agrep <- function(R, adapter){
-    poslist <- c(0:(readlength-1))    
+  # # NEW AGREP VERSION    # PROBLEM agrep behaves a little strange... see issues
+  # # 
+  # # This is abandoned!
+  # #
+  # find_positions_agrep <- function(R, adapter){
+  #   poslist <- c(1:(readlength))    
+  #   adapter <- as.character(adapter)
+  #   length_adapter <- nchar(adapter)
+  #   this_file <- paste0(input, "temp_R", R, "_", adapter, "_M", missM,".txt")
+  #   
+  #   # OLD: per line search:
+  #   # agrep_position <- c()
+  #   # lines_of_file <- as.integer(system(intern=TRUE, paste0("wc -l ", input, "temp_R", R, "_", adapter, "_M", missM,".txt | cut -f1 -d' '")))
+  #   # if (lines_of_file > 0) {
+  #   #   # The approach with agrep per line:
+  #   #   for (readline in 1:lines_of_file) {
+  #   #     agrep_position <- c(agrep_position, as.integer(system(intern = TRUE, paste0("sed -n ", readline, "p ", input, "temp_R", R, "_", adapter, "_M", missM,".txt | agrep -", missM, " -b ", adapter, " | cut -f1 -d'='"))) - (length_adapter-1))
+  #   #   }
+  #   #     
+  #   # } else { # end lines_of_file > 0
+  #   #   agrep_position <- c()
+  #   # }
+  #   
+  #   # New approach, as the line by line is too slow! PROBLEM: agrep seems to run in bug -.-
+  #   # if (file.size(this_file) != 0){
+  #   #   # make agrep vector for the positions  # PROBLEM: it will find more than one per line:. how?
+  #   #   agrep_adapter_positions <- as.integer(system(intern = TRUE, paste0("agrep -", missM, " -b '", adapter, "' ", this_file,  " | cut -f1 -d'='")))
+  #   #   agrep_newline_positions <- c(-1, as.integer(system(intern = TRUE, paste0("agrep -b '$' ", this_file, " | cut -f1 -d'='"))))
+  #   #   # The last endofline is not interesting. But we need to account for the first line, which is done in the command above.
+  #   #   agrep_newline_positions <- agrep_newline_positions[-length(agrep_newline_positions)]
+  #   #   if (length(agrep_adapter_positions) != length(agrep_newline_positions)) {
+  #   #     stop("There is a problem that should not happen. Are the settings identical to grada_analyze()? Are the files untempered?")
+  #   #   }
+  #   #   # Get the real position (starting at 1!):
+  #   #   agrep_adapter_positions <- agrep_adapter_positions - agrep_newline_positions - (length_adapter - 1)
+  #   #   
+  #   #   ### add vector to poslist
+  #   #   poslist <- append(poslist, agrep_adapter_positions)
+  #   # }  
+  #   
+  #   ### change points to frequency over the readlength nt.
+  #   poscount <- table(poslist)
+  #   
+  #   ### correction loop due to first creation of poslist.
+  #   for (i in 1:readlength) {
+  #     poscount[i] <- poscount[i] - 1
+  #   }
+  #   save(poscount, file = paste0(input, paste0("Adapter_Positions_R", R, "_", adapter, "_M", missM, ".Rdata")))
+  # }
+  
+  # As the files are smaller now, I think it is a possible solution to use it in R or python.
+  find_positions_R <- function(R, adapter, missM){
+    poslist <- c(1:(readlength))    
     adapter <- as.character(adapter)
     length_adapter <- nchar(adapter)
-    agrep_position <- c()
-    lines_of_file <- as.integer(system(intern=TRUE, paste0("wc -l ", input, "temp_R", R, "_", adapter, "_M", missM,".txt | cut -f1 -d' '")))
-    if (lines_of_file > 0) {
-      # The approach with agrep per line:
-      for (readline in 1:lines_of_file) {
-        agrep_position <- c(agrep_position, as.integer(system(intern = TRUE, paste0("sed -n ", readline, "p ", input, "temp_R", R, "_", adapter, "_M", missM,".txt | agrep -", missM, " -b ", adapter, " | cut -f1 -d'='"))) - (length_adapter-1))
-      }
-        
-    } else { # end lines_of_file > 0
-      agrep_position <- c()
-    }
-    
-    ### add vector to poslist
-    poslist <- append(poslist, agrep_position)
-    
+    this_file <- paste0(input, "temp_R", R, "_", adapter, "_M", missM,".txt")
+    open_file <- file(this_file, "r")
+    content <- readLines(open_file)
+    close(open_file)
+    findings <- unlist(aregexec(adapter, content, fixed = TRUE, max.distance = missM))
+    # add vector to poslist:
+    poslist <- append(poslist, findings)
     ### change points to frequency over the readlength nt.
     poscount <- table(poslist)
-    
     ### correction loop due to first creation of poslist.
     for (i in 1:readlength) {
       poscount[i] <- poscount[i] - 1
     }
     save(poscount, file = paste0(input, paste0("Adapter_Positions_R", R, "_", adapter, "_M", missM, ".Rdata")))
-  }
+  }  
 
-  # call function
+  # call function   # This will make 1 file for each mismatch!
   for (m in M_min:M_max) {
-    missM <- m              # I hope this work as intended. (alternative is to make Mismatch difference in the functions...)
     adapter_positions <- matrix(ncol = readlength, nrow = 0)
     colnames(adapter_positions) <- c(1:readlength)
     if (numCores == 1){
-      lapply(adapters[,"Sequence"], find_positions)
+      lapply(adapters[,"Sequence"], find_positions, m)
     } else {  
-      mclapply(adapters[,"Sequence"], find_positions, mc.silent = TRUE, mc.cores = numCores)
+      mclapply(adapters[,"Sequence"], find_positions, m, mc.silent = TRUE, mc.cores = numCores)
     }
-  
     # load all data in a table
     for (adapter_i in adapters[,"Sequence"]) {
       if (PE){Rnum <- 1:2} else {Rnum <- 1:1}
       for (R in Rnum){
-        load(paste0(input, paste0("Adapter_Positions_R", R ,"_", adapter_i, "_M", missM, ".Rdata")))
+        load(paste0(input, paste0("Adapter_Positions_R", R ,"_", adapter_i, "_M", m, ".Rdata")))
         adapter_positions <- rbind(adapter_positions, poscount[1:readlength])
         # Change Rowname to Adapter
         row.names(adapter_positions)[nrow(adapter_positions)] <- paste0(as.character(adapters[, "Adapter"][adapters[,"Sequence"] == adapter_i]), " R_", R)
       }
     }
     # Save Data File for plotting.
-    save(adapter_positions, file = paste0(input, "Adapter_Positions_M", missM, ".Rdata"))
+    save(adapter_positions, file = paste0(input, "Adapter_Positions_M", m, ".Rdata"))
   }
   #### Delete temp files ####
   system(paste0("rm ", input, "Adapter_Positions_R*"), intern = FALSE)

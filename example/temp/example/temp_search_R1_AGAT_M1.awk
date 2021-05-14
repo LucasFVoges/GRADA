@@ -1,0 +1,1 @@
+match($0, /(.{0,1}|A.)GAT|A(.{0,1}|G.)AT|AG(.{0,1}|A.)T|AGA.{0,1}/) {s=$0; m=0; while((n=match(s, /(.{0,1}|A.)GAT|A(.{0,1}|G.)AT|AG(.{0,1}|A.)T|AGA.{0,1}/))>0){m+=n; printf "%s,", m; m+=3; s=substr(s, n+4)}}

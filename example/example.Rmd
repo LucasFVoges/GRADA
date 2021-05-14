@@ -45,9 +45,9 @@ grada_analyze(
   PE = FALSE,                 # analyze paired data (or 2 read files)
   read1 = "example.fastq.gz",    # read file (fastq, txt ... anything agrep works with.)
   read2 = NULL,               # read2 file if PE
-  seq = "seq_adapter_2.txt",    # adapter files
+  seq = "seq_adapter.txt",    # adapter files
   M_min = 0,                  # minimal mismatches (0 is required for plotting.)
-  M_max = 8,                  # maximal mismatches
+  M_max = 3,                  # maximal mismatches
   output = "temp/example/",   # the folder for the created data (will be large)
   keepfiles = TRUE,           # keep them for analyze_positions! (can be deleted on the fly for very big data...)
   numCores = detectCores()/2  # parallel computing (will be slow at "1")
@@ -60,7 +60,8 @@ grada_analyze_positions(
   numCores = detectCores()/2,
   keepfiles = TRUE,           # the temporary files (from before) will be kept!
   M_min = 0, 
-  M_max = 8
+  M_max = 3,
+  method = "R"
 )
 ```
 
@@ -95,7 +96,7 @@ library(DT)
 
 grada_table_simple(input = "temp/example/")   # needs (kable, knitr)
 
-#grada_table_md(input = "temp/example/")       # needs (rmarkdown, html)
+#grada_table_md(input = "temp/example/")       # needs (rmarkdown)
 
 #grada_table_DT(input = "temp/example/")       # needs (DT)
 
@@ -106,7 +107,7 @@ grada_table_simple(input = "temp/example/")   # needs (kable, knitr)
 ```{r, eval=TRUE}
 library(GRADA)
 
-grada_plot_bar(PE = FALSE, skip = FALSE, input = "temp/example/", colour = 2, M_min = 0, M_max=8, plot_row = 1, plot_col = 1)
-grada_plot_bar(PE = FALSE, skip = FALSE, full_length = TRUE, input = "temp/example/", colour = 2, M_min = 0, M_max=8, plot_row = 1, plot_col = 1)
+grada_plot_bar(PE = FALSE, skip = FALSE, input = "temp/example/", colour = 2, M_min = 0, M_max=3)
+grada_plot_bar(PE = FALSE, skip = FALSE, full_length = TRUE, input = "temp/example/", colour = 2, M_min = 0, M_max=3)
 ```
 
