@@ -41,12 +41,14 @@ grada_plot_bar <- function(PE = TRUE, input="temp/", M_min=0, M_max=0, full_leng
   missM <- M_max
   
   ### Colour Scheme
-  if (colour == 1) {
+  if (colour[1] == 1) {
+  color_chem <- c("#000929", "#000e42", "#00186e", "#05269c", "#0d33b8", "#143cc9", "#234bdb", "#3761fa", "#577bff")
+  } else if (colour[1] == 2) {
   color_chem <- c("#E8985E", "#A9714B", "#54442B", "#262A10", "#141204", "#000000", "#000000", "#000000", "#000000")
-  } else if (colour == 2) {
-  color_chem <- c("#241E4E", "#960200", "#CE6C47", "#FFD046", "#EADAA2", "#F4EBCD", "#FFF5D6", "#FFEBEB", "#FBF2EF")
-  } else if (colour == 3) {
-    color_chem <- c("#C6C6C6", "#ABABAB", "#919191", "#777777", "#5E5E5E", "#474747", "#303030", "#1B1B1B", "#000000")
+  } else if(colour[1] == 3) {
+    color_chem <- c("#400100", "#960200", "#CE6C47", "#FFD046", "#EADAA2", "#F4EBCD", "#FFF5D6", "#FFEBEB", "#FBF2EF")
+  } else if (colour[1] == 4) {
+    color_chem <- c("#000000", "#1B1B1B", "#303030", "#474747", "#5E5E5E", "#777777", "#919191", "#ABABAB", "#C6C6C6")
   } else {
   color_chem <- colour
   }
@@ -121,6 +123,8 @@ grada_plot_bar <- function(PE = TRUE, input="temp/", M_min=0, M_max=0, full_leng
   #### PLOT ####
   # Graph generation: (barplot simple one after another.)
   par(mfrow=c(plot_row,plot_col))
+  lab <- c(1, rep(NA, (ncol(plotlist[[missM+1]])-1)))
+  lab[seq(10, ncol(plotlist[[missM+1]]), 10)] <- seq(10, ncol(plotlist[[missM+1]]), 1)
   for (i in row.names(plotlist[[missM+1]])){
     plotdata <- c()
     sum <- 0
@@ -134,16 +138,26 @@ grada_plot_bar <- function(PE = TRUE, input="temp/", M_min=0, M_max=0, full_leng
       }
       sum <- sum + thissum
     }
+    # barplot will be stacked, so the number need to be subtrakted
+    if (nrow(plotdata) > 1) {
+      for(row in 1:(nrow(plotdata)-1)){
+        plotdata[row, ] <- plotdata[row, ] - plotdata[row+1, ]
+      }
+    }
     # for skipping empty plots. (this should consider R1/R2 later)
     if (skip && sum <= 0) {
      next
     }
+    limit <- max(plotdata)
     barplot(plotdata,
             col = thiscolor_chem,
             main = sprintf("%s (1.pos)", i),
             xlab="read position",
             ylab="counts", 
-            #ylim = c(0, 90000),
+            axis.lty = 1,
+            names.arg=lab,
+            ylim = c(0, limit),
+            space = 0,
             las = 2,
             cex.names = .8,
             cex.main = .8,
