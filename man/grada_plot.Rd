@@ -10,7 +10,7 @@ grada_plot()
 R barplots of the adapter positions.
 }
 \description{
-This function will refer to the stdandard plot function.
+This function will refer to the standard plot function.
 }
 \details{
 It will only accept standard settings. You cannot define anything here. Please use another _plot function, if you want to change the in-/output.

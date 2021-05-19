@@ -8,7 +8,7 @@ grada_plot_bar(
   PE = TRUE,
   input = "temp/",
   M_min = 0,
-  M_max = 0,
+  M_max = 2,
   full_length = FALSE,
   skip = FALSE,
   plot_row = 2,
@@ -21,9 +21,9 @@ grada_plot_bar(
 
 \item{input}{input folder where the "adapter_Positions.Rdata" is (output from grada_analyze_positions() std. "temp/")}
 
-\item{M_min}{min mismatches. (not more than 5 plots allowed)}
+\item{M_min}{min mismatches. (std. 0)}
 
-\item{M_max}{max mismatches. (not more than 5 plots allowed)}
+\item{M_max}{max mismatches. (std. 2)}
 
 \item{full_length}{if TRUE it will plot all positions of the adapter (instead of the first pos only) (std. FALSE)}
 

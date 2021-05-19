@@ -1,6 +1,6 @@
 #' GRADA - Plot
 #'
-#' This function will refer to the stdandard plot function. 
+#' This function will refer to the standard plot function. 
 #' 
 #' It will only accept standard settings. You cannot define anything here. Please use another _plot function, if you want to change the in-/output.
 #' 
@@ -23,8 +23,8 @@ grada_plot <- function(){
 #'
 #' @param PE paired data? TRUE / FALSE (std. TRUE) (obsolete option. is no longer used)
 #' @param input input folder where the "adapter_Positions.Rdata" is (output from grada_analyze_positions() std. "temp/")
-#' @param M_min min mismatches. (not more than 5 plots allowed)
-#' @param M_max max mismatches. (not more than 5 plots allowed)
+#' @param M_min min mismatches. (std. 0)
+#' @param M_max max mismatches. (std. 2)
 #' @param full_length if TRUE it will plot all positions of the adapter (instead of the first pos only) (std. FALSE)
 #' @param skip if TRUE, it will skip plots for empty Data, so you will not get empty plots. (std. FALSE)
 #' @param plot_row is the par(mfrow=c(plot_row,plot_col)) for arrenging the plots (std. 2)
@@ -32,7 +32,7 @@ grada_plot <- function(){
 #' @param colour colour scheme for plot. (1 = std. / 2 = differen / 3 = black and white) or you can use your own in the format: colour = c("red", "blue", #FFFFFF ...)
 #' @return R barplots of the adapter positions.
 #' @export
-grada_plot_bar <- function(PE = TRUE, input="temp/", M_min=0, M_max=0, full_length=FALSE, skip=FALSE, plot_row=2, plot_col=2, colour=1){
+grada_plot_bar <- function(PE = TRUE, input="temp/", M_min=0, M_max=2, full_length=FALSE, skip=FALSE, plot_row=2, plot_col=2, colour=1){
   #### CHECK INPUT ####
   if (M_min < 0){stop("You have entered a negative number...")}
   if (M_min > M_max){stop("minimum mismatches can't be higher then maximum!")}
@@ -124,7 +124,7 @@ grada_plot_bar <- function(PE = TRUE, input="temp/", M_min=0, M_max=0, full_leng
   # Graph generation: (barplot simple one after another.)
   par(mfrow=c(plot_row,plot_col))
   lab <- c(1, rep(NA, (ncol(plotlist[[missM+1]])-1)))
-  lab[seq(10, ncol(plotlist[[missM+1]]), 10)] <- seq(10, ncol(plotlist[[missM+1]]), 1)
+  lab[seq(10, ncol(plotlist[[missM+1]]), 10)] <- seq(10, ncol(plotlist[[missM+1]]), 10)
   for (i in row.names(plotlist[[missM+1]])){
     plotdata <- c()
     sum <- 0
@@ -138,10 +138,12 @@ grada_plot_bar <- function(PE = TRUE, input="temp/", M_min=0, M_max=0, full_leng
       }
       sum <- sum + thissum
     }
-    # barplot will be stacked, so the number need to be subtrakted
+    # barplot will be stacked, so the number need to be subtracted
     if (nrow(plotdata) > 1) {
       for(row in 1:(nrow(plotdata)-1)){
         plotdata[row, ] <- plotdata[row, ] - plotdata[row+1, ]
+        # ! - Problem can be, that the mismatch is not on the same position anymore. (indel) So negative number is possible.
+        plotdata[row, ] <- replace(plotdata[row, ], plotdata[row, ] < 0, 0)
       }
     }
     # for skipping empty plots. (this should consider R1/R2 later)
@@ -149,7 +151,8 @@ grada_plot_bar <- function(PE = TRUE, input="temp/", M_min=0, M_max=0, full_leng
      next
     }
     limit <- max(plotdata)
-    barplot(plotdata,
+    
+    barplot(plotdata[nrow(plotdata):1,],
             col = thiscolor_chem,
             main = sprintf("%s (1.pos)", i),
             xlab="read position",
@@ -160,6 +163,7 @@ grada_plot_bar <- function(PE = TRUE, input="temp/", M_min=0, M_max=0, full_leng
             space = 0,
             las = 2,
             cex.names = .8,
+            cex.axis = .8,
             cex.main = .8,
             border = NA)
     legend("topright",
