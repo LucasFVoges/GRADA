@@ -9,13 +9,14 @@ A complete introduction: [see in Vignettes](http://htmlpreview.github.io/?https:
 
 ## System requirements:
 
-- UNIX System (developed on Linux Mint 20.1 Cinnamon)
-- R-Studio
+- UNIX System (with awk and agrep installed)
+- R environment [R Project](https://www.r-project.org/)
 - R-packages are suggested:
   - DT
   - parallel
   - knitr
   - rmarkdown
+  - utils
   
 ## Installation:
 To install the master brach (latest stable release)
