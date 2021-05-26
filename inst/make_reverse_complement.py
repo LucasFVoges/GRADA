@@ -22,6 +22,8 @@ def make_rc(seq):
             seq_rc_lst.append("C")
         if nuc == "A":
             seq_rc_lst.append("T")
+        if nuc == "N":
+            seq_rc_lst.append("N")
 
     seq_rc = ''.join(seq_rc_lst)
 
